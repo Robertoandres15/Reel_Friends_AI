@@ -3,9 +3,7 @@
   "appName": "Reel Friends",
   "webDir": "out",
   "server": {
-    "url": "http://192.168.3.106:3000",
-    "cleartext": true,
-    "allowNavigation": ["*"]
+    "url": "https://www.reel-friends.ai/"
   },
   "plugins": {
     "SplashScreen": {
