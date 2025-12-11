@@ -71,7 +71,7 @@ export default async function FriendProfilePage({ params }: FriendProfilePagePro
   const otherLists = friendLists?.filter((list) => list.type !== "recommendations" && list.type !== "wishlist") || []
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <div className="container mx-auto px-4 py-8 pb-20 md:pb-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}

@@ -45,6 +45,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import { isNative } from "@/lib/capacitor"
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null)
@@ -735,14 +736,14 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-white">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-foreground">
+    <div className="min-h-screen pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-foreground">
       <nav className="flex items-center justify-start md:justify-center gap-4 md:gap-8 p-4 border-b border-white/10 overflow-x-auto">
         <a
           href="/feed"
@@ -801,7 +802,9 @@ export default function SettingsPage() {
               { id: "payments", label: "Payments", icon: CreditCard },
               { id: "security", label: "Sign-In & Security", icon: Lock },
               { id: "legal", label: "Legal", icon: FileText },
-            ].map((item) => (
+            ]
+             .filter((item) => (item.id === "payments" && isNative() ? false : true))
+             .map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
@@ -829,7 +832,7 @@ export default function SettingsPage() {
               <option value="moderation">Moderation</option>
               <option value="appearance">Appearance</option>
               <option value="notifications">Notifications</option>
-              <option value="payments">Payments</option>
+              {!isNative() && <option value="payments">Payments</option>}
               <option value="security">Sign-In & Security</option>
               <option value="legal">Legal</option>
             </select>

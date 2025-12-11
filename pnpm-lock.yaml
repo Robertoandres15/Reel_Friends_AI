@@ -86,6 +86,9 @@ importers:
       '@vercel/blob':
         specifier: latest
         version: 2.0.0
+      capacitor-plugin-safe-area:
+        specifier: ^4.0.3
+        version: 4.0.3(@capacitor/core@7.4.3)
       child_process:
         specifier: 1.0.2
         version: 1.0.2
@@ -1466,6 +1469,11 @@ packages:
 
   caniuse-lite@1.0.30001739:
     resolution: {integrity: sha512-y+j60d6ulelrNSwpPyrHdl+9mJnQzHBr08xm48Qno0nSk4h3Qojh+ziv2qE6rXf4k3tadF4o1J/1tAbVm1NtnA==}
+
+  capacitor-plugin-safe-area@4.0.3:
+    resolution: {integrity: sha512-RteQU+EcwfQFup66fOrlfYNfkGi3jSVwD8YimUAdyZlelriiqRctmKK5ONYXyt+Wd2e5y5F1A081kB9SRHGg2Q==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
 
   child_process@1.0.2:
     resolution: {integrity: sha512-Wmza/JzL0SiWz7kl6MhIKT5ceIlnFPJX+lwUGj7Clhy5MMldsSoJR0+uvRzOS5Kv45Mq7t1PoE8TsOA9bzvb6g==}
@@ -3682,6 +3690,10 @@ snapshots:
   camelcase-css@2.0.1: {}
 
   caniuse-lite@1.0.30001739: {}
+
+  capacitor-plugin-safe-area@4.0.3(@capacitor/core@7.4.3):
+    dependencies:
+      '@capacitor/core': 7.4.3
 
   child_process@1.0.2: {}
 

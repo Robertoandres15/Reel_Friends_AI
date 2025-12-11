@@ -8,7 +8,7 @@ export default function PrivacyPolicyPage() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className="min-h-screen pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)] bg-slate-900 text-white">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">

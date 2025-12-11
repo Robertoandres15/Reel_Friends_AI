@@ -1,29 +1,38 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { Analytics } from "@vercel/analytics/next"
-import { Suspense, useEffect } from "react"
-import { MobileInitializer } from "@/components/mobile-initializer"
-import { initializeCapacitor } from "@/lib/capacitor"
-import { SupabaseAuthHandler } from "@/components/supabase-auth-handler"
+import type React from "react";
+import { Analytics } from "@vercel/analytics/next";
+import { Suspense, useEffect } from "react";
+import { MobileInitializer } from "@/components/mobile-initializer";
+import { initializeCapacitor } from "@/lib/capacitor";
+import { SupabaseAuthHandler } from "@/components/supabase-auth-handler";
+import { useSafeAreaInsets } from "@/hooks/use-safe-area-insets";
 
 function CapacitorInitializer() {
   useEffect(() => {
-    initializeCapacitor()
-  }, [])
+    initializeCapacitor();
+  }, []);
 
-  return null
+  return null;
 }
+
+function SafeAreaInitializer() {
+  useSafeAreaInsets();
+
+  return null;
+}
+
 
 export default function ClientLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <>
       <MobileInitializer />
       <CapacitorInitializer />
+      <SafeAreaInitializer />
       <SupabaseAuthHandler />
       <Suspense fallback={null}>{children}</Suspense>
       <Analytics />
@@ -45,5 +54,5 @@ export default function ClientLayout({
         }}
       />
     </>
-  )
+  );
 }

@@ -294,7 +294,7 @@ export default async function FeedPage() {
   console.log("[v0] FeedPage - AI movie suggestions loaded, rendering page")
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 pb-20 md:pb-8">
         <header className="flex items-center justify-between mb-6 sm:mb-8">
           <div className="flex items-center gap-2">

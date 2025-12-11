@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Download, Smartphone, Monitor } from "lucide-react"
+import { isNative } from "@/lib/capacitor"
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>
@@ -10,6 +11,9 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function PWAInstallButton() {
+  if (isNative()) {
+    return null;
+  }
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [canInstall, setCanInstall] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
