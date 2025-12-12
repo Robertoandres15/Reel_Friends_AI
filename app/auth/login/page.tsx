@@ -124,7 +124,12 @@ export default function LoginPage() {
                   className="bg-white/10 border-white/20 text-white"
                 />
               </div>
-              {error && <p className="text-red-400 text-sm">{error}</p>}
+              {error && <p className="text-red-400 text-sm">{error}</p>}         
+              <div className="space-y-2 text-right" style={{marginTop: 0}}>
+                <Link href="/auth/forgot-password" className="text-sm text-purple-400 hover:text-purple-300 underline">
+                  Forgot Password?
+                </Link>
+              </div>
               <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
