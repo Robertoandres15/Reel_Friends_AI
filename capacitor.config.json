@@ -3,9 +3,18 @@
   "appName": "Reel Friends",
   "webDir": "out",
   "server": {
-    "androidScheme": "https"
+    "url": "https://www.reel-friends.ai/"
   },
   "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#1a1a2e",
+      "showSpinner": false,
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "iosSpinnerStyle": "small",
+      "spinnerColor": "#7c3aed"
+    },
     "StatusBar": {
       "style": "dark",
       "backgroundColor": "#1e293b"

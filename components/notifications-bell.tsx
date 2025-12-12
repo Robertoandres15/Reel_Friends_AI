@@ -6,15 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 interface NotificationsBellProps {
   className?: string
-  showLabel?: boolean
 }
 
-export function NotificationsBell({ className, showLabel = false }: NotificationsBellProps) {
+export function NotificationsBell({ className }: NotificationsBellProps) {
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+    const pathname = usePathname()
 
   useEffect(() => {
     fetchUnreadCount()
@@ -38,17 +39,19 @@ export function NotificationsBell({ className, showLabel = false }: Notification
       setIsLoading(false)
     }
   }
+  
+  const isActive = pathname === '/notifications' || pathname.startsWith('/notifications' + "/")
 
   return (
     <Link href="/notifications" className={cn("relative", className)}>
       <Button
         variant="ghost"
-        size={showLabel ? "default" : "icon"}
-        className={cn("relative", showLabel ? "flex items-center gap-2" : "h-10 w-10")}
+        size={"icon"}
+        className={cn("relative",  "flex flex-col items-center gap-2 h-10 w-10")}
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
       >
-        <Bell className="h-5 w-5" />
-        {showLabel && <span>Notifications</span>}
+        <Bell className={cn("h-5 w-5", isActive ? "text-purple-400 bg-purple-400/10" : "text-slate-400 hover:text-white hover:bg-white/5")} />
+        <span className="text-xs font-medium leading-tight text-center text-slate-400">Alerts</span>
 
         {unreadCount > 0 && (
           <Badge

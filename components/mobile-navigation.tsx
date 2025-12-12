@@ -77,7 +77,6 @@ export function MobileNavigation() {
 
         <div className="flex flex-col items-center gap-1 px-2 py-3 min-w-0 flex-1 min-h-[44px] justify-center">
           <NotificationsBell className="flex flex-col items-center gap-1" />
-          <span className="text-xs font-medium leading-tight text-center text-slate-400">Alerts</span>
         </div>
       </div>
     </nav>
