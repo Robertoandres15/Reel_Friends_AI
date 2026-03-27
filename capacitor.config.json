@@ -1,6 +1,6 @@
 {
-  "appId": "com.reelfriends.app",
-  "appName": "Reel Friends",
+  "appId": "com.reelfriendsapp",
+  "appName": "Castd",
   "webDir": "out",
   "server": {
     "url": "https://www.reel-friends.ai/"
@@ -20,7 +20,7 @@
       "backgroundColor": "#1e293b"
     },
     "Keyboard": {
-      "resize": "body",
+      "resize": "native",
       "style": "dark",
       "resizeOnFullScreen": true
     },

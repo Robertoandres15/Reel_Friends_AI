@@ -1,65 +1,137 @@
-import { Capacitor } from "@capacitor/core"
-import { StatusBar, Style } from "@capacitor/status-bar"
-import { Haptics, ImpactStyle } from "@capacitor/haptics"
-import { App } from "@capacitor/app"
-import { Keyboard } from "@capacitor/keyboard"
+import { Capacitor } from "@capacitor/core";
+import { StatusBar, Style } from "@capacitor/status-bar";
+import { Haptics, ImpactStyle } from "@capacitor/haptics";
+import { App } from "@capacitor/app";
+import { Keyboard } from "@capacitor/keyboard";
 
-export const isMobile = () => Capacitor.isNativePlatform()
+export const isMobile = () => Capacitor.isNativePlatform();
+
+type ListenerHandle = { remove: () => Promise<void> };
+
+let mobileFeaturesInitialized = false;
+let listenerHandles: ListenerHandle[] = [];
+let focusHandler: ((event: FocusEvent) => void) | null = null;
+
+let lastFocusedElement: HTMLElement | null = null;
+
+const isFormField = (element: HTMLElement | null): element is HTMLElement => {
+  if (!element) return false;
+
+  return (
+    element.tagName === "INPUT" ||
+    element.tagName === "TEXTAREA" ||
+    element.tagName === "SELECT"
+  );
+};
+
+const scrollFieldIntoViewIfNeeded = (element: HTMLElement) => {
+  // With Capacitor keyboard resize: "native", iOS handles most scrolling.
+  // We only nudge if the element is truly off-screen (e.g. clipped at top).
+  const rect = element.getBoundingClientRect();
+
+  if (rect.top < 0) {
+    window.scrollBy({ top: rect.top - 10, behavior: "smooth" });
+  }
+};
 
 export const initializeMobileFeatures = async () => {
-  if (!isMobile()) return
+  if (!isMobile() || mobileFeaturesInitialized) return;
+
+  mobileFeaturesInitialized = true;
 
   try {
-    // Configure status bar
-    await StatusBar.setStyle({ style: Style.Dark })
-    await StatusBar.setBackgroundColor({ color: "#1e293b" })
+    await StatusBar.setStyle({ style: Style.Dark });
+    await StatusBar.setBackgroundColor({ color: "#1e293b" });
 
-    // Handle app state changes
-    App.addListener("appStateChange", ({ isActive }) => {
-      console.log("[v0] App state changed. Active:", isActive)
-    })
+    const appStateListener = await App.addListener(
+      "appStateChange",
+      ({ isActive }) => {
+        console.log("[mobile] App state changed. Active:", isActive);
+      },
+    );
+    listenerHandles.push(appStateListener);
 
-    // Handle keyboard events
-    Keyboard.addListener("keyboardWillShow", () => {
-      document.body.classList.add("keyboard-open")
-    })
+    const keyboardShowListener = await Keyboard.addListener(
+      "keyboardWillShow",
+      () => {
+        document.body.classList.add("keyboard-open");
+      },
+    );
+    listenerHandles.push(keyboardShowListener);
 
-    Keyboard.addListener("keyboardWillHide", () => {
-      document.body.classList.remove("keyboard-open")
-    })
+    const keyboardHideListener = await Keyboard.addListener(
+      "keyboardWillHide",
+      () => {
+        document.body.classList.remove("keyboard-open");
+        lastFocusedElement = null;
+      },
+    );
+    listenerHandles.push(keyboardHideListener);
+
+    if (!focusHandler) {
+      focusHandler = (event: FocusEvent) => {
+        const target = event.target as HTMLElement;
+
+        if (!isFormField(target)) return;
+
+        if (lastFocusedElement === target) return;
+        lastFocusedElement = target;
+
+        if (document.body.classList.contains("keyboard-open")) {
+          setTimeout(() => {
+            scrollFieldIntoViewIfNeeded(target);
+          }, 50);
+        }
+      };
+
+      document.addEventListener("focus", focusHandler, true);
+    }
   } catch (error) {
-    console.error("[v0] Error initializing mobile features:", error)
-  }
-}
+    console.error("[mobile] Error initializing mobile features:", error);
+    mobileFeaturesInitialized = false;
 
-export const triggerHaptic = async (style: ImpactStyle = ImpactStyle.Medium) => {
-  if (!isMobile()) return
+    await Promise.allSettled(
+      listenerHandles.map((listener) => listener.remove()),
+    );
+    listenerHandles = [];
+
+    if (focusHandler) {
+      document.removeEventListener("focus", focusHandler, true);
+      focusHandler = null;
+    }
+  }
+};
+
+export const triggerHaptic = async (
+  style: ImpactStyle = ImpactStyle.Medium,
+) => {
+  if (!isMobile()) return;
 
   try {
-    await Haptics.impact({ style })
+    await Haptics.impact({ style });
   } catch (error) {
-    console.error("[v0] Error triggering haptic:", error)
+    console.error("[mobile] Error triggering haptic:", error);
   }
-}
+};
 
 export const setStatusBarStyle = async (isDark: boolean) => {
-  if (!isMobile()) return
+  if (!isMobile()) return;
 
   try {
     await StatusBar.setStyle({
       style: isDark ? Style.Dark : Style.Light,
-    })
+    });
   } catch (error) {
-    console.error("[v0] Error setting status bar style:", error)
+    console.error("[mobile] Error setting status bar style:", error);
   }
-}
+};
 
 export const hideKeyboard = async () => {
-  if (!isMobile()) return
+  if (!isMobile()) return;
 
   try {
-    await Keyboard.hide()
+    await Keyboard.hide();
   } catch (error) {
-    console.error("[v0] Error hiding keyboard:", error)
+    console.error("[mobile] Error hiding keyboard:", error);
   }
-}
+};
