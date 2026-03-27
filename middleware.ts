@@ -1,5 +1,5 @@
-import { createServerClient } from "@supabase/ssr"
-import { NextResponse, type NextRequest } from "next/server"
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   // Skip middleware for static files, API routes, and auth pages
@@ -11,12 +11,12 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.includes(".") ||
     request.nextUrl.pathname === "/"
   ) {
-    return NextResponse.next()
+    return NextResponse.next();
   }
 
   let supabaseResponse = NextResponse.next({
     request,
-  })
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,43 +24,51 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value),
+          );
           supabaseResponse = NextResponse.next({
             request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options),
+          );
         },
       },
     },
-  )
+  );
 
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
   // If there's an error (like user_not_found), clear auth cookies and redirect to login
-  if (error) {
-    console.log("[v0] Auth error in middleware:", error.message)
+  if (error && error.message !== "Auth session missing!") {
+    console.log("[v0] Auth error in middleware:", error.message);
 
     // Create a response that clears all Supabase auth cookies
-    const url = request.nextUrl.clone()
-    url.pathname = "/auth/login"
-    const response = NextResponse.redirect(url)
+    const url = request.nextUrl.clone();
+
+    url.pathname = "/auth/login";
+    const response = NextResponse.redirect(url);
 
     // Clear all Supabase auth cookies
     const cookiesToClear = request.cookies
       .getAll()
-      .filter((cookie) => cookie.name.startsWith("sb-") || cookie.name.includes("supabase"))
+      .filter(
+        (cookie) =>
+          cookie.name.startsWith("sb-") || cookie.name.includes("supabase"),
+      );
 
     cookiesToClear.forEach((cookie) => {
-      response.cookies.delete(cookie.name)
-    })
+      response.cookies.delete(cookie.name);
+    });
 
-    return response
+    return response;
   }
 
   if (
@@ -68,14 +76,16 @@ export async function middleware(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/login") &&
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/signup") &&
+    !request.nextUrl.pathname.startsWith("/legal/privacy") &&
     request.nextUrl.pathname !== "/"
   ) {
-    const url = request.nextUrl.clone()
-    url.pathname = "/auth/login"
-    return NextResponse.redirect(url)
+    const url = request.nextUrl.clone();
+
+    url.pathname = "/auth/login";
+    return NextResponse.redirect(url);
   }
 
-  return supabaseResponse
+  return supabaseResponse;
 }
 
 export const config = {
@@ -90,4 +100,4 @@ export const config = {
      */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
-}
+};

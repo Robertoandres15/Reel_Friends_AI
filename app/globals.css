@@ -56,7 +56,9 @@
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
-  font-feature-settings: "rlig" 1, "calt" 1;
+  font-feature-settings:
+    "rlig" 1,
+    "calt" 1;
 }
 
 /* Added mobile-specific fixes for fixed positioning and viewport stability */
@@ -81,4 +83,14 @@ body {
   body {
     padding-bottom: env(safe-area-inset-bottom);
   }
+}
+
+/* Hide bottom navigation when keyboard is open */
+body.keyboard-open .mobile-bottom-nav {
+  display: none !important;
+}
+
+/* Reduce bottom padding when keyboard is visible so content isn't pushed under hidden nav */
+body.keyboard-open {
+  padding-bottom: 0 !important;
 }

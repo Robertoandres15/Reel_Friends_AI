@@ -1,6 +1,6 @@
 {
-  "name": "Reel Friends",
-  "short_name": "Reel Friends",
+  "name": "Castd",
+  "short_name": "Castd",
   "description": "Discover Movies with Friends - Share recommendations, build wishlists, and discover your next favorite movie through your social circle.",
   "start_url": "/",
   "display": "standalone",

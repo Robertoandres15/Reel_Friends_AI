@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Home, Search, Users, BookmarkPlus, User } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { NotificationsBell } from "@/components/notifications-bell"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Home, Search, Users, BookmarkPlus, User } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { NotificationsBell } from "@/components/notifications-bell";
 
 const navigationItems = [
   {
@@ -37,14 +37,14 @@ const navigationItems = [
     icon: User,
     ariaLabel: "Go to Profile page",
   },
-]
+];
 
 export function MobileNavigation() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-sm border-t border-white/10 md:hidden support-[position:fixed]:fixed"
+      className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-sm border-t border-white/10 md:hidden support-[position:fixed]:fixed"
       style={{
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
@@ -53,8 +53,9 @@ export function MobileNavigation() {
     >
       <div className="flex items-center justify-around px-1 py-2">
         {navigationItems.map((item) => {
-          const Icon = item.icon
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+          const Icon = item.icon;
+          const isActive =
+            pathname === item.href || pathname.startsWith(item.href + "/");
 
           return (
             <Link
@@ -62,7 +63,9 @@ export function MobileNavigation() {
               href={item.href}
               className={cn(
                 "flex flex-col items-center gap-1 px-2 py-3 rounded-lg transition-colors min-w-0 flex-1 min-h-[44px] justify-center",
-                isActive ? "text-purple-400 bg-purple-400/10" : "text-slate-400 hover:text-white hover:bg-white/5",
+                isActive
+                  ? "text-purple-400 bg-purple-400/10"
+                  : "text-slate-400 hover:text-white hover:bg-white/5",
               )}
               aria-label={item.ariaLabel}
               aria-current={isActive ? "page" : undefined}
@@ -72,7 +75,7 @@ export function MobileNavigation() {
                 {item.name}
               </span>
             </Link>
-          )
+          );
         })}
 
         <div className="flex flex-col items-center gap-1 px-2 py-3 min-w-0 flex-1 min-h-[44px] justify-center">
@@ -80,5 +83,5 @@ export function MobileNavigation() {
         </div>
       </div>
     </nav>
-  )
+  );
 }
