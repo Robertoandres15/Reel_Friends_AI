@@ -23,10 +23,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Film } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
@@ -169,8 +169,15 @@ export default function SignUpPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Film className="h-8 w-8 text-purple-400" />
-            <h1 className="text-2xl font-bold text-white">Reel Friends</h1>
+            <Image
+              src="/logo.svg"
+              alt="Castd logo"
+              width={32}
+              height={32}
+              className="h-8 w-8"
+              priority
+            />
+            <h1 className="text-2xl font-bold text-white">Castd</h1>
           </div>
           <p className="text-slate-300">Join the movie community</p>
         </div>
@@ -273,9 +280,9 @@ export default function SignUpPage() {
                               1. Acceptance of Terms
                             </h3>
                             <p>
-                              By accessing and using Reel Friends, you accept
-                              and agree to be bound by the terms and provision
-                              of this agreement.
+                              By accessing and using Castd, you accept and agree
+                              to be bound by the terms and provision of this
+                              agreement.
                             </p>
 
                             <h3 className="text-lg font-semibold text-purple-400">
@@ -312,7 +319,7 @@ export default function SignUpPage() {
                             <p>
                               The Service and its original content, features and
                               functionality are and will remain the exclusive
-                              property of Reel Friends and its licensors.
+                              property of Castd and its licensors.
                             </p>
 
                             <h3 className="text-lg font-semibold text-purple-400">

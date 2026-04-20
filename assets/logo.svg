@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 68" width="68" height="68">
+  <defs>
+    <linearGradient id="iconGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#EC4899"/>
+    </linearGradient>
+    <linearGradient id="wordGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#EC4899"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon: Rounded square with purple-to-pink gradient -->
+  <rect x="0" y="0" width="68" height="68" rx="16" fill="url(#iconGrad)"/>
+
+  <!-- Subtle inner glow -->
+  <rect x="0" y="0" width="68" height="68" rx="16" fill="white" opacity="0.04"/>
+
+  <!-- Play triangle (pointing right) -->
+  <polygon points="16,19 16,49 44,34" fill="white"/>
+
+  <!-- Broadcast arc 1 — inner semicircle, r=9 centered at (44,34) -->
+  <path d="M 44 25 A 9 9 0 0 1 44 43"
+        stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Broadcast arc 2 — outer semicircle, r=16 centered at (44,34) -->
+  <path d="M 44 18 A 16 16 0 0 1 44 50"
+        stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- Wordmark: "Castd" -->
+  <text x="84" y="46"
+        font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
+        font-size="34" font-weight="700" letter-spacing="-0.5"
+        fill="white">Castd</text>
+</svg>

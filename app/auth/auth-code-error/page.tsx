@@ -1,7 +1,14 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { AlertCircle, Film } from "lucide-react"
-import Link from "next/link"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function AuthCodeErrorPage() {
   return (
@@ -9,8 +16,15 @@ export default function AuthCodeErrorPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Film className="h-8 w-8 text-purple-400" />
-            <h1 className="text-2xl font-bold text-white">Reel Friends</h1>
+            <Image
+              src="/logo.svg"
+              alt="Castd logo"
+              width={32}
+              height={32}
+              className="h-8 w-8"
+              priority
+            />
+            <h1 className="text-2xl font-bold text-white">Castd</h1>
           </div>
         </div>
 
@@ -26,14 +40,19 @@ export default function AuthCodeErrorPage() {
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-slate-300 text-sm">
-              The confirmation link may have expired or been used already. Please try signing up again or contact
-              support if the problem persists.
+              The confirmation link may have expired or been used already.
+              Please try signing up again or contact support if the problem
+              persists.
             </p>
             <div className="flex flex-col gap-2">
               <Button asChild className="bg-purple-600 hover:bg-purple-700">
                 <Link href="/auth/signup">Try Again</Link>
               </Button>
-              <Button variant="outline" asChild className="border-white/20 text-white hover:bg-white/10 bg-transparent">
+              <Button
+                variant="outline"
+                asChild
+                className="border-white/20 text-white hover:bg-white/10 bg-transparent"
+              >
                 <Link href="/auth/login">Back to Sign In</Link>
               </Button>
             </div>
@@ -41,5 +60,5 @@ export default function AuthCodeErrorPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

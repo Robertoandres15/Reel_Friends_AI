@@ -1,99 +1,117 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { formatDistanceToNow } from "date-fns"
-import { Bell, Users, Heart, MessageCircle, Share2, Film, Check } from "lucide-react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { cn } from "@/lib/utils"
-import Link from "next/link"
+import { useState } from "react";
+import { formatDistanceToNow } from "date-fns";
+import { Bell, Users, Heart, MessageCircle, Share2, Check } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import Image from "next/image";
 
 interface NotificationItemProps {
   notification: {
-    id: string
-    type: string
-    title: string
-    message: string
-    read: boolean
-    created_at: string
-    from_user_id?: string
-    related_id?: string
-    related_type?: string
-    data?: Record<string, any>
+    id: string;
+    type: string;
+    title: string;
+    message: string;
+    read: boolean;
+    created_at: string;
+    from_user_id?: string;
+    related_id?: string;
+    related_type?: string;
+    data?: Record<string, any>;
     from_user?: {
-      id: string
-      display_name: string
-      avatar_url?: string
-    }
-  }
-  onMarkAsRead?: (id: string) => void
+      id: string;
+      display_name: string;
+      avatar_url?: string;
+    };
+  };
+  onMarkAsRead?: (id: string) => void;
 }
 
-export function NotificationItem({ notification, onMarkAsRead }: NotificationItemProps) {
-  const [isMarking, setIsMarking] = useState(false)
+export function NotificationItem({
+  notification,
+  onMarkAsRead,
+}: NotificationItemProps) {
+  const [isMarking, setIsMarking] = useState(false);
 
   const getNotificationIcon = () => {
     switch (notification.type) {
       case "friend_request_received":
       case "friend_request_accepted":
-        return <Users className="h-4 w-4 text-blue-400" />
+        return <Users className="h-4 w-4 text-blue-400" />;
       case "mutual_match":
-        return <Film className="h-4 w-4 text-purple-400" />
+        return (
+          <Image
+            src="/logo.svg"
+            alt="Castd logo"
+            width={16}
+            height={16}
+            className="h-4 w-4"
+            priority
+          />
+        );
       case "list_like":
-        return <Heart className="h-4 w-4 text-red-400" />
+        return <Heart className="h-4 w-4 text-red-400" />;
       case "list_comment":
-        return <MessageCircle className="h-4 w-4 text-green-400" />
+        return <MessageCircle className="h-4 w-4 text-green-400" />;
       case "list_shared":
-        return <Share2 className="h-4 w-4 text-yellow-400" />
+        return <Share2 className="h-4 w-4 text-yellow-400" />;
       case "recommendation_added_to_wishlist":
-        return <Bell className="h-4 w-4 text-orange-400" />
+        return <Bell className="h-4 w-4 text-orange-400" />;
       default:
-        return <Bell className="h-4 w-4 text-slate-400" />
+        return <Bell className="h-4 w-4 text-slate-400" />;
     }
-  }
+  };
 
   const getNotificationLink = () => {
     switch (notification.type) {
       case "friend_request_received":
       case "friend_request_accepted":
-        return "/friends"
+        return "/friends";
       case "mutual_match":
-        return "/explore"
+        return "/explore";
       case "list_comment":
       case "list_like":
       case "list_shared":
-        return notification.related_id ? `/lists/${notification.related_id}` : "/lists"
+        return notification.related_id
+          ? `/lists/${notification.related_id}`
+          : "/lists";
       case "recommendation_added_to_wishlist":
-        return "/profile"
+        return "/profile";
       default:
-        return "/feed"
+        return "/feed";
     }
-  }
+  };
 
   const handleMarkAsRead = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
-    if (notification.read || isMarking) return
+    if (notification.read || isMarking) return;
 
-    setIsMarking(true)
+    setIsMarking(true);
     try {
-      const response = await fetch(`/api/notifications/${notification.id}/read`, {
-        method: "PATCH",
-      })
+      const response = await fetch(
+        `/api/notifications/${notification.id}/read`,
+        {
+          method: "PATCH",
+        },
+      );
 
       if (response.ok) {
-        onMarkAsRead?.(notification.id)
+        onMarkAsRead?.(notification.id);
       }
     } catch (error) {
-      console.error("[v0] Failed to mark notification as read:", error)
+      console.error("[v0] Failed to mark notification as read:", error);
     } finally {
-      setIsMarking(false)
+      setIsMarking(false);
     }
-  }
+  };
 
   const NotificationContent = () => (
     <Card
@@ -109,9 +127,12 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
         {/* User Avatar (if from another user) */}
         {notification.from_user && (
           <Avatar className="h-8 w-8 flex-shrink-0">
-            <AvatarImage src={notification.from_user.avatar_url || "/placeholder.svg"} />
+            <AvatarImage
+              src={notification.from_user.avatar_url || "/placeholder.svg"}
+            />
             <AvatarFallback className="bg-slate-700 text-slate-300 text-xs">
-              {notification.from_user.display_name?.charAt(0)?.toUpperCase() || "?"}
+              {notification.from_user.display_name?.charAt(0)?.toUpperCase() ||
+                "?"}
             </AvatarFallback>
           </Avatar>
         )}
@@ -123,16 +144,25 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
               <h4
                 className={cn(
                   "text-sm font-medium mb-1",
-                  !notification.read ? "text-white font-semibold" : "text-slate-200",
+                  !notification.read
+                    ? "text-white font-semibold"
+                    : "text-slate-200",
                 )}
               >
                 {notification.title || "Notification"}
               </h4>
-              <p className={cn("text-sm leading-relaxed", !notification.read ? "text-slate-200" : "text-slate-400")}>
+              <p
+                className={cn(
+                  "text-sm leading-relaxed",
+                  !notification.read ? "text-slate-200" : "text-slate-400",
+                )}
+              >
                 {notification.message || "You have a new notification"}
               </p>
               <p className="text-xs text-slate-500 mt-2">
-                {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                {formatDistanceToNow(new Date(notification.created_at), {
+                  addSuffix: true,
+                })}
               </p>
             </div>
 
@@ -153,16 +183,18 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
         </div>
 
         {/* Unread Indicator */}
-        {!notification.read && <div className="flex-shrink-0 w-2 h-2 bg-purple-500 rounded-full mt-2" />}
+        {!notification.read && (
+          <div className="flex-shrink-0 w-2 h-2 bg-purple-500 rounded-full mt-2" />
+        )}
       </div>
     </Card>
-  )
+  );
 
-  const link = getNotificationLink()
+  const link = getNotificationLink();
 
   return (
     <Link href={link} className="block">
       <NotificationContent />
     </Link>
-  )
+  );
 }
