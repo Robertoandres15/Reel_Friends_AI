@@ -7,11 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { Film } from "lucide-react";
-
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import Image from "next/image";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -79,8 +78,15 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Film className="h-8 w-8 text-purple-400" />
-            <h1 className="text-2xl font-bold text-white">Reel Friends</h1>
+            <Image
+              src="/logo.svg"
+              alt="Castd logo"
+              width={32}
+              height={32}
+              className="h-8 w-8"
+              priority
+            />
+            <h1 className="text-2xl font-bold text-white">Castd</h1>
           </div>
         </div>
 

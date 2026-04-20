@@ -1580,7 +1580,7 @@ export default function SettingsPage() {
                           Ad-Free Subscription
                         </h3>
                         <p className="text-gray-300">
-                          Enjoy Reel Friends without ads for $2.99/year
+                          Enjoy Castd without ads for $2.99/year
                         </p>
                       </div>
                       <div className="text-right">
@@ -2151,7 +2151,7 @@ export default function SettingsPage() {
           <DialogHeader>
             <DialogTitle>Subscribe to Ad-Free</DialogTitle>
             <DialogDescription>
-              Get one year of ad-free access to Reel Friends for just $2.99
+              Get one year of ad-free access to Castd for just $2.99
             </DialogDescription>
           </DialogHeader>
 

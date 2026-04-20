@@ -1,51 +1,56 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Download, Smartphone, Monitor } from "lucide-react"
-import { isNative } from "@/lib/capacitor"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Download, Smartphone, Monitor } from "lucide-react";
+import { isNative } from "@/lib/capacitor";
 
 interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
 export function PWAInstallButton() {
   if (isNative()) {
     return null;
   }
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [canInstall, setCanInstall] = useState(false)
-  const [isInstalled, setIsInstalled] = useState(false)
-  const [isClient, setIsClient] = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
-  const [isDesktop, setIsDesktop] = useState(false)
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [canInstall, setCanInstall] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
-    setIsClient(true)
-    console.log("[v0] PWA Install Button - Starting initialization")
+    setIsClient(true);
+    console.log("[v0] PWA Install Button - Starting initialization");
 
     // Check if app is already installed
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches
-    const isInStandaloneMode = (window.navigator as any).standalone === true
-    const appInstalled = isStandalone || isInStandaloneMode
+    const isStandalone = window.matchMedia(
+      "(display-mode: standalone)",
+    ).matches;
+    const isInStandaloneMode = (window.navigator as any).standalone === true;
+    const appInstalled = isStandalone || isInStandaloneMode;
 
     if (appInstalled) {
-      console.log("[v0] PWA Install Button - App already installed")
-      setIsInstalled(true)
-      return
+      console.log("[v0] PWA Install Button - App already installed");
+      setIsInstalled(true);
+      return;
     }
 
     // Device detection
-    const userAgent = navigator.userAgent
-    const platform = navigator.platform
-    const maxTouchPoints = navigator.maxTouchPoints || 0
+    const userAgent = navigator.userAgent;
+    const platform = navigator.platform;
+    const maxTouchPoints = navigator.maxTouchPoints || 0;
 
-    const isIOSDevice = /iPad|iPhone|iPod/.test(userAgent) || (platform === "MacIntel" && maxTouchPoints > 1)
-    const isDesktopDevice = !isIOSDevice && !/Android|Mobile/.test(userAgent)
+    const isIOSDevice =
+      /iPad|iPhone|iPod/.test(userAgent) ||
+      (platform === "MacIntel" && maxTouchPoints > 1);
+    const isDesktopDevice = !isIOSDevice && !/Android|Mobile/.test(userAgent);
 
-    setIsIOS(isIOSDevice)
-    setIsDesktop(isDesktopDevice)
+    setIsIOS(isIOSDevice);
+    setIsDesktop(isDesktopDevice);
 
     console.log("[v0] PWA Install Button - Device detection:", {
       userAgent,
@@ -54,64 +59,77 @@ export function PWAInstallButton() {
       isIOSDevice,
       isDesktopDevice,
       isAppInstalled: appInstalled,
-    })
+    });
 
     // Check service worker registration
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.getRegistrations().then((registrations) => {
-        console.log("[v0] PWA Install Button - Service worker registrations:", registrations.length)
-      })
+        console.log(
+          "[v0] PWA Install Button - Service worker registrations:",
+          registrations.length,
+        );
+      });
     }
 
     // Always show install button - we'll handle different scenarios in the click handler
-    setCanInstall(true)
+    setCanInstall(true);
 
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
-      console.log("[v0] PWA Install Button - beforeinstallprompt event received")
-      e.preventDefault()
-      setDeferredPrompt(e as BeforeInstallPromptEvent)
-    }
+      console.log(
+        "[v0] PWA Install Button - beforeinstallprompt event received",
+      );
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     // Check if beforeinstallprompt fired after a delay
     setTimeout(() => {
       if (!deferredPrompt) {
-        console.log("[v0] PWA Install Button - beforeinstallprompt event did not fire")
+        console.log(
+          "[v0] PWA Install Button - beforeinstallprompt event did not fire",
+        );
       }
-    }, 2000)
+    }, 2000);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
-    }
-  }, [])
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+    };
+  }, []);
 
   const handleInstallClick = async () => {
-    console.log("[v0] PWA Install Button - Install button clicked")
-    console.log("[v0] PWA Install Button - Has deferred prompt:", !!deferredPrompt)
+    console.log("[v0] PWA Install Button - Install button clicked");
+    console.log(
+      "[v0] PWA Install Button - Has deferred prompt:",
+      !!deferredPrompt,
+    );
 
     if (isIOS) {
       // For iOS, show instructions
       alert(
         "To install this app on your iPhone/iPad:\n\n1. Tap the Share button (⬆️) in Safari\n2. Scroll down and tap 'Add to Home Screen'\n3. Tap 'Add' to confirm\n\nThe app will appear on your home screen like a native app!",
-      )
-      return
+      );
+      return;
     }
 
     if (deferredPrompt) {
       try {
-        console.log("[v0] PWA Install Button - Prompting for install")
-        deferredPrompt.prompt()
-        const { outcome } = await deferredPrompt.userChoice
-        console.log("[v0] PWA Install Button - User choice:", outcome)
+        console.log("[v0] PWA Install Button - Prompting for install");
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log("[v0] PWA Install Button - User choice:", outcome);
 
         if (outcome === "accepted") {
-          setDeferredPrompt(null)
-          setCanInstall(false)
+          setDeferredPrompt(null);
+          setCanInstall(false);
         }
       } catch (error) {
-        console.error("[v0] PWA Install Button - Error during install:", error)
+        console.error("[v0] PWA Install Button - Error during install:", error);
       }
     } else {
       // Fallback instructions for different browsers
@@ -120,7 +138,7 @@ export function PWAInstallButton() {
           "To install this app on your computer:\n\n" +
             "Chrome/Edge:\n" +
             "1. Click the three dots menu (⋮)\n" +
-            "2. Look for 'Install Reel Friends' or 'Apps'\n" +
+            "2. Look for 'Install Castd' or 'Apps'\n" +
             "3. Click 'Install'\n\n" +
             "Firefox:\n" +
             "1. Look for the install icon in the address bar\n" +
@@ -129,30 +147,30 @@ export function PWAInstallButton() {
             "1. Go to File menu\n" +
             "2. Select 'Add to Dock'\n\n" +
             "If you don't see these options, try refreshing the page or check if your browser supports PWA installation.",
-        )
+        );
       } else {
         // Mobile fallback
         alert(
           "To install this app:\n\n1. Open your browser menu\n2. Look for 'Install App' or 'Add to Home Screen'\n3. Follow the prompts to install\n\nIf you don't see this option, try using Chrome or Safari.",
-        )
+        );
       }
     }
-  }
+  };
 
   // Don't render on server or if conditions not met
-  if (!isClient || isInstalled || !canInstall) return null
+  if (!isClient || isInstalled || !canInstall) return null;
 
   const getIcon = () => {
-    if (isIOS) return <Smartphone className="mr-2 h-5 w-5" />
-    if (isDesktop) return <Monitor className="mr-2 h-5 w-5" />
-    return <Download className="mr-2 h-5 w-5" />
-  }
+    if (isIOS) return <Smartphone className="mr-2 h-5 w-5" />;
+    if (isDesktop) return <Monitor className="mr-2 h-5 w-5" />;
+    return <Download className="mr-2 h-5 w-5" />;
+  };
 
   const getButtonText = () => {
-    if (isIOS) return "Install App"
-    if (isDesktop) return "Install App"
-    return "Install App"
-  }
+    if (isIOS) return "Install App";
+    if (isDesktop) return "Install App";
+    return "Install App";
+  };
 
   return (
     <Button
@@ -164,5 +182,5 @@ export function PWAInstallButton() {
       {getIcon()}
       {getButtonText()}
     </Button>
-  )
+  );
 }

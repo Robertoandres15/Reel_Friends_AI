@@ -1,25 +1,32 @@
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import Link from "next/link"
-import { Film, Users, Heart, Star } from "lucide-react"
-import { PWAInstallButton } from "@/components/pwa-install-button"
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Link from "next/link";
+import { Users, Heart, Star } from "lucide-react";
+import { PWAInstallButton } from "@/components/pwa-install-button";
+import Image from "next/image";
 
 export default async function HomePage() {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
   try {
     const {
       data: { user },
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
     // If user is authenticated, redirect immediately
     if (user) {
-      redirect("/feed")
+      redirect("/feed");
     }
   } catch (error) {
-    console.log("[v0] Auth check failed, showing landing page")
+    console.log("[v0] Auth check failed, showing landing page");
   }
 
   return (
@@ -29,11 +36,22 @@ export default async function HomePage() {
           {/* Header */}
           <header className="flex items-center justify-between mb-16">
             <div className="flex items-center gap-2">
-              <Film className="h-8 w-8 text-purple-400" />
-              <h1 className="text-2xl font-bold text-white">Reel Friends</h1>
+              <Image
+                src="/logo.svg"
+                alt="Castd logo"
+                width={32}
+                height={32}
+                className="h-8 w-8"
+                priority
+              />
+              <h1 className="text-2xl font-bold text-white">Castd</h1>
             </div>
             <div className="flex gap-2">
-              <Button variant="ghost" asChild className="text-white hover:bg-white/10">
+              <Button
+                variant="ghost"
+                asChild
+                className="text-white hover:bg-white/10"
+              >
                 <Link href="/auth/login">Login</Link>
               </Button>
               <Button asChild className="bg-purple-600 hover:bg-purple-700">
@@ -51,10 +69,15 @@ export default async function HomePage() {
               </span>
             </h2>
             <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto text-pretty">
-              Share recommendations, build wishlists, and discover your next favorite movie through your social circle.
+              Share recommendations, build wishlists, and discover your next
+              favorite movie through your social circle.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button size="lg" asChild className="bg-purple-600 hover:bg-purple-700 text-lg px-8 py-6">
+              <Button
+                size="lg"
+                asChild
+                className="bg-purple-600 hover:bg-purple-700 text-lg px-8 py-6"
+              >
                 <Link href="/auth/signup">Get Started</Link>
               </Button>
               <PWAInstallButton />
@@ -66,9 +89,12 @@ export default async function HomePage() {
             <Card className="bg-slate-800/80 border-slate-600 backdrop-blur-sm">
               <CardHeader>
                 <Users className="h-12 w-12 text-purple-400 mb-4" />
-                <CardTitle className="text-slate-200">Social Discovery</CardTitle>
+                <CardTitle className="text-slate-200">
+                  Social Discovery
+                </CardTitle>
                 <CardDescription className="text-slate-300">
-                  Connect with friends and discover movies through their recommendations and wishlists.
+                  Connect with friends and discover movies through their
+                  recommendations and wishlists.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -78,7 +104,8 @@ export default async function HomePage() {
                 <Heart className="h-12 w-12 text-pink-400 mb-4" />
                 <CardTitle className="text-slate-200">Personal Lists</CardTitle>
                 <CardDescription className="text-slate-300">
-                  Create and manage your wishlist and share your favorite recommendations with friends.
+                  Create and manage your wishlist and share your favorite
+                  recommendations with friends.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -88,7 +115,8 @@ export default async function HomePage() {
                 <Star className="h-12 w-12 text-yellow-400 mb-4" />
                 <CardTitle className="text-slate-200">Smart Feed</CardTitle>
                 <CardDescription className="text-slate-300">
-                  Stay updated with your friends' latest movie activities and discoveries.
+                  Stay updated with your friends' latest movie activities and
+                  discoveries.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -98,11 +126,18 @@ export default async function HomePage() {
           <div className="text-center">
             <Card className="bg-slate-800/80 border-slate-600 backdrop-blur-sm max-w-2xl mx-auto">
               <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-slate-200 mb-4">Ready to start your movie journey?</h3>
+                <h3 className="text-2xl font-bold text-slate-200 mb-4">
+                  Ready to start your movie journey?
+                </h3>
                 <p className="text-slate-300 mb-6">
-                  Join thousands of movie lovers sharing recommendations and building their perfect watchlists.
+                  Join thousands of movie lovers sharing recommendations and
+                  building their perfect watchlists.
                 </p>
-                <Button size="lg" asChild className="bg-purple-600 hover:bg-purple-700">
+                <Button
+                  size="lg"
+                  asChild
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
                   <Link href="/auth/signup">Create Your Account</Link>
                 </Button>
               </CardContent>
@@ -111,5 +146,5 @@ export default async function HomePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

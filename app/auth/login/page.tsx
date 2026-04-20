@@ -1,96 +1,113 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { createClient, clearSupabaseSession } from "@/lib/supabase/client"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Film } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { createClient, clearSupabaseSession } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Image from "next/image";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
     try {
-      console.log("[v0] Clearing any existing session data before login")
-      clearSupabaseSession()
+      console.log("[v0] Clearing any existing session data before login");
+      clearSupabaseSession();
 
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const supabase = createClient()
+      const supabase = createClient();
 
-      console.log("[v0] Attempting login for:", email)
+      console.log("[v0] Attempting login for:", email);
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/feed`,
+          emailRedirectTo:
+            process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
+            `${window.location.origin}/feed`,
         },
-      })
+      });
 
-      if (error) throw error
+      if (error) throw error;
 
       if (!data.user) {
-        throw new Error("Login failed - no user data returned")
+        throw new Error("Login failed - no user data returned");
       }
 
       console.log("[v0] Login successful for user:", {
         id: data.user.id,
         email: data.user.email,
-      })
+      });
 
       const {
         data: { session },
-      } = await supabase.auth.getSession()
+      } = await supabase.auth.getSession();
 
       if (!session || session.user.email !== email) {
         console.error("[v0] Session mismatch after login!", {
           expectedEmail: email,
           sessionEmail: session?.user.email,
-        })
-        throw new Error("Session verification failed. Please try again.")
+        });
+        throw new Error("Session verification failed. Please try again.");
       }
 
-      console.log("[v0] Session verified for correct user")
+      console.log("[v0] Session verified for correct user");
 
-      localStorage.setItem("reel-friends-current-user-email", email)
+      localStorage.setItem("reel-friends-current-user-email", email);
 
-      router.push("/feed")
+      router.push("/feed");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
+      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Film className="h-8 w-8 text-purple-400" />
-            <h1 className="text-2xl font-bold text-white">Reel Friends</h1>
+            <Image
+              src="/logo.svg"
+              alt="Castd logo"
+              width={32}
+              height={32}
+              className="h-8 w-8"
+              priority
+            />
+            <h1 className="text-2xl font-bold text-white">Castd</h1>
           </div>
           <p className="text-slate-300">Welcome back to your movie community</p>
         </div>
 
         <Card className="bg-slate-800/80 border-slate-600 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-slate-200 text-center">Sign In</CardTitle>
+            <CardTitle className="text-slate-200 text-center">
+              Sign In
+            </CardTitle>
             <CardDescription className="text-slate-300 text-center">
               Enter your credentials to access your account
             </CardDescription>
@@ -124,20 +141,30 @@ export default function LoginPage() {
                   className="bg-white/10 border-white/20 text-white"
                 />
               </div>
-              {error && <p className="text-red-400 text-sm">{error}</p>}         
-              <div className="space-y-2 text-right" style={{marginTop: 0}}>
-                <Link href="/auth/forgot-password" className="text-sm text-purple-400 hover:text-purple-300 underline">
+              {error && <p className="text-red-400 text-sm">{error}</p>}
+              <div className="space-y-2 text-right" style={{ marginTop: 0 }}>
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-sm text-purple-400 hover:text-purple-300 underline"
+                >
                   Forgot Password?
                 </Link>
               </div>
-              <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                disabled={isLoading}
+              >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
             <div className="mt-6 text-center">
               <p className="text-slate-300 text-sm">
                 Don't have an account?{" "}
-                <Link href="/auth/signup" className="text-purple-400 hover:text-purple-300 underline">
+                <Link
+                  href="/auth/signup"
+                  className="text-purple-400 hover:text-purple-300 underline"
+                >
                   Sign up
                 </Link>
               </p>
@@ -146,5 +173,5 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

@@ -37,7 +37,7 @@ function PrivacyPolicyContent() {
         <div className="prose prose-invert max-w-none">
           <div className="bg-slate-800/50 rounded-lg p-6 mb-6">
             <p className="text-slate-300 leading-relaxed">
-              This Privacy Policy explains how Reel Friends ("we," "us," "our")
+              This Privacy Policy explains how Castd ("we," "us," "our")
               collects, uses, and protects your information when you use our
               mobile application ("App").
             </p>

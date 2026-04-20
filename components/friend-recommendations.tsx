@@ -1,59 +1,66 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Check, X, Users, Film } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import Link from "next/link"
-import { ListSelector } from "@/components/list-selector"
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Check, X, Users } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
+import { ListSelector } from "@/components/list-selector";
+import Image from "next/image";
 
 interface Friend {
-  id: string
-  username: string
-  display_name: string
-  avatar_url?: string
+  id: string;
+  username: string;
+  display_name: string;
+  avatar_url?: string;
 }
 
 interface Recommendation {
-  id: string
-  tmdb_id: number
-  media_type: string
-  title: string
-  poster_path?: string
-  release_date?: string
-  recommending_friends: Friend[]
+  id: string;
+  tmdb_id: number;
+  media_type: string;
+  title: string;
+  poster_path?: string;
+  release_date?: string;
+  recommending_friends: Friend[];
 }
 
 export function FriendRecommendations() {
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
-  const [loading, setLoading] = useState(true)
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const { toast } = useToast()
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const { toast } = useToast();
 
   useEffect(() => {
-    fetchRecommendations()
-  }, [])
+    fetchRecommendations();
+  }, []);
 
   const fetchRecommendations = async () => {
     try {
-      const response = await fetch("/api/recommendations")
-      const data = await response.json()
-      setRecommendations(data.recommendations || [])
+      const response = await fetch("/api/recommendations");
+      const data = await response.json();
+      setRecommendations(data.recommendations || []);
     } catch (error) {
-      console.error("Error fetching recommendations:", error)
+      console.error("Error fetching recommendations:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleAction = async (action: string) => {
-    if (currentIndex >= recommendations.length) return
+    if (currentIndex >= recommendations.length) return;
 
-    const recommendation = recommendations[currentIndex]
+    const recommendation = recommendations[currentIndex];
 
     try {
       const response = await fetch("/api/recommendations/actions", {
@@ -70,11 +77,11 @@ export function FriendRecommendations() {
           release_date: recommendation.release_date,
           recommended_by: recommendation.recommending_friends[0]?.username,
         }),
-      })
+      });
 
       if (response.ok) {
         // Move to next recommendation
-        setCurrentIndex((prev) => prev + 1)
+        setCurrentIndex((prev) => prev + 1);
 
         // Show success message
         switch (action) {
@@ -82,42 +89,50 @@ export function FriendRecommendations() {
             toast({
               title: "Marked as Seen",
               description: `${recommendation.title} has been marked as seen.`,
-            })
-            break
+            });
+            break;
           case "not_interested":
             toast({
               title: "Not Interested",
               description: `${recommendation.title} won't be shown again.`,
-            })
-            break
+            });
+            break;
         }
       } else {
-        const errorData = await response.json()
+        const errorData = await response.json();
         toast({
           title: "Error",
-          description: errorData.error || "Something went wrong. Please try again.",
+          description:
+            errorData.error || "Something went wrong. Please try again.",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
-      console.error("Error handling action:", error)
+      console.error("Error handling action:", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="text-center py-12">
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
-          <Film className="h-8 w-8 text-purple-400 animate-pulse" />
+          <Image
+            src="/logo.svg"
+            alt="Castd logo"
+            width={32}
+            height={32}
+            className="h-8 w-8 animate-pulse"
+            priority
+          />
         </div>
         <p className="text-slate-400">Loading recommendations...</p>
       </div>
-    )
+    );
   }
 
   if (recommendations.length === 0 || currentIndex >= recommendations.length) {
@@ -126,20 +141,24 @@ export function FriendRecommendations() {
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
           <Users className="h-8 w-8 text-purple-400" />
         </div>
-        <h3 className="text-lg font-semibold text-white mb-2">No recommendations yet!</h3>
+        <h3 className="text-lg font-semibold text-white mb-2">
+          No recommendations yet!
+        </h3>
         <p className="text-slate-400 mb-4">
-          Ask your friends to add movies to their recommendations list to see suggestions here.
+          Ask your friends to add movies to their recommendations list to see
+          suggestions here.
         </p>
         <Button asChild className="bg-purple-600 hover:bg-purple-700">
           <Link href="/friends">Find Friends</Link>
         </Button>
       </div>
-    )
+    );
   }
 
-  const currentRecommendation = recommendations[currentIndex]
-  const primaryFriend = currentRecommendation.recommending_friends[0]
-  const hasMultipleFriends = currentRecommendation.recommending_friends.length > 1
+  const currentRecommendation = recommendations[currentIndex];
+  const primaryFriend = currentRecommendation.recommending_friends[0];
+  const hasMultipleFriends =
+    currentRecommendation.recommending_friends.length > 1;
 
   return (
     <div className="max-w-md mx-auto">
@@ -160,14 +179,24 @@ export function FriendRecommendations() {
               />
             )}
 
-            <h2 className="text-xl font-bold text-white mb-2">{currentRecommendation.title}</h2>
+            <h2 className="text-xl font-bold text-white mb-2">
+              {currentRecommendation.title}
+            </h2>
 
             <div className="flex items-center justify-center gap-2 mb-4">
-              <Badge variant="secondary" className="bg-purple-600/20 text-purple-300">
-                {currentRecommendation.media_type === "movie" ? "Movie" : "TV Series"}
+              <Badge
+                variant="secondary"
+                className="bg-purple-600/20 text-purple-300"
+              >
+                {currentRecommendation.media_type === "movie"
+                  ? "Movie"
+                  : "TV Series"}
               </Badge>
               {currentRecommendation.release_date && (
-                <Badge variant="outline" className="border-white/20 text-slate-300">
+                <Badge
+                  variant="outline"
+                  className="border-white/20 text-slate-300"
+                >
                   {currentRecommendation.release_date.split("-")[0]}
                 </Badge>
               )}
@@ -175,9 +204,13 @@ export function FriendRecommendations() {
 
             <div className="flex items-center justify-center gap-2 mb-6">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={primaryFriend?.avatar_url || "/placeholder.svg"} />
+                <AvatarImage
+                  src={primaryFriend?.avatar_url || "/placeholder.svg"}
+                />
                 <AvatarFallback className="bg-purple-600 text-white text-sm">
-                  {primaryFriend?.display_name?.[0] || primaryFriend?.username?.[0] || "U"}
+                  {primaryFriend?.display_name?.[0] ||
+                    primaryFriend?.username?.[0] ||
+                    "U"}
                 </AvatarFallback>
               </Avatar>
 
@@ -185,33 +218,53 @@ export function FriendRecommendations() {
                 <Dialog>
                   <DialogTrigger asChild>
                     <button className="text-white hover:text-purple-300 transition-colors">
-                      <span className="font-medium">+{primaryFriend?.display_name || primaryFriend?.username}</span>
+                      <span className="font-medium">
+                        +
+                        {primaryFriend?.display_name || primaryFriend?.username}
+                      </span>
                     </button>
                   </DialogTrigger>
                   <DialogContent className="bg-slate-900 border-white/10">
                     <DialogHeader>
-                      <DialogTitle className="text-white">Recommended by</DialogTitle>
+                      <DialogTitle className="text-white">
+                        Recommended by
+                      </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-3">
-                      {currentRecommendation.recommending_friends.map((friend) => (
-                        <div key={friend.id} className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={friend.avatar_url || "/placeholder.svg"} />
-                            <AvatarFallback className="bg-purple-600 text-white">
-                              {friend.display_name?.[0] || friend.username?.[0] || "U"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-white font-medium">{friend.display_name || friend.username}</p>
-                            <p className="text-slate-400 text-sm">@{friend.username}</p>
+                      {currentRecommendation.recommending_friends.map(
+                        (friend) => (
+                          <div
+                            key={friend.id}
+                            className="flex items-center gap-3"
+                          >
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage
+                                src={friend.avatar_url || "/placeholder.svg"}
+                              />
+                              <AvatarFallback className="bg-purple-600 text-white">
+                                {friend.display_name?.[0] ||
+                                  friend.username?.[0] ||
+                                  "U"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-white font-medium">
+                                {friend.display_name || friend.username}
+                              </p>
+                              <p className="text-slate-400 text-sm">
+                                @{friend.username}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ),
+                      )}
                     </div>
                   </DialogContent>
                 </Dialog>
               ) : (
-                <span className="text-white font-medium">{primaryFriend?.display_name || primaryFriend?.username}</span>
+                <span className="text-white font-medium">
+                  {primaryFriend?.display_name || primaryFriend?.username}
+                </span>
               )}
             </div>
           </div>
@@ -229,7 +282,7 @@ export function FriendRecommendations() {
               }}
               actionType="wishlist"
               onSuccess={() => {
-                setCurrentIndex((prev) => prev + 1)
+                setCurrentIndex((prev) => prev + 1);
               }}
             />
             <Button
@@ -252,5 +305,5 @@ export function FriendRecommendations() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

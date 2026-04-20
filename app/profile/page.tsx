@@ -1,35 +1,37 @@
-"use client"
+"use client";
 
-import { createClient } from "@/lib/supabase/client"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Film, Users, Search, Settings, Edit, List, Activity } from "lucide-react"
-import Link from "next/link"
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useIsMobile } from "@/hooks/use-mobile"
+import { createClient } from "@/lib/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Users, Search, Settings, Edit, List, Activity } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useIsMobile } from "@/hooks/use-mobile";
+import Image from "next/image";
 
 function UserLists({ userId }: { userId: string }) {
-  const [lists, setLists] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [lists, setLists] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadLists() {
       try {
-        console.log("[v0] Loading user lists for:", userId)
-        const supabase = createClient()
+        console.log("[v0] Loading user lists for:", userId);
+        const supabase = createClient();
         if (!supabase) {
-          setError("Unable to connect to database")
-          return
+          setError("Unable to connect to database");
+          return;
         }
 
         const { data: listsData, error: listsError } = await supabase
           .from("lists")
-          .select(`
+          .select(
+            `
             *,
             list_items(
               id,
@@ -41,31 +43,32 @@ function UserLists({ userId }: { userId: string }) {
               rating,
               release_date
             )
-          `)
+          `,
+          )
           .eq("user_id", userId)
           .eq("is_public", true)
-          .order("created_at", { ascending: false })
+          .order("created_at", { ascending: false });
 
         if (listsError) {
-          console.error("[v0] Lists fetch error:", listsError)
-          setError("Failed to load lists")
-          return
+          console.error("[v0] Lists fetch error:", listsError);
+          setError("Failed to load lists");
+          return;
         }
 
-        console.log("[v0] User lists loaded:", listsData?.length || 0)
-        setLists(listsData || [])
+        console.log("[v0] User lists loaded:", listsData?.length || 0);
+        setLists(listsData || []);
       } catch (error) {
-        console.error("[v0] UserLists error:", error)
-        setError("Unable to load lists")
+        console.error("[v0] UserLists error:", error);
+        setError("Unable to load lists");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
     if (userId) {
-      loadLists()
+      loadLists();
     }
-  }, [userId])
+  }, [userId]);
 
   if (loading) {
     return (
@@ -73,7 +76,7 @@ function UserLists({ userId }: { userId: string }) {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
         <p className="text-slate-400">Loading lists...</p>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -81,11 +84,14 @@ function UserLists({ userId }: { userId: string }) {
       <div className="text-center py-8">
         <List className="h-12 w-12 mx-auto mb-4 text-slate-400" />
         <p className="text-slate-400">{error}</p>
-        <Button onClick={() => window.location.reload()} className="mt-4 bg-purple-600 hover:bg-purple-700">
+        <Button
+          onClick={() => window.location.reload()}
+          className="mt-4 bg-purple-600 hover:bg-purple-700"
+        >
           Try Again
         </Button>
       </div>
-    )
+    );
   }
 
   if (!lists || lists.length === 0) {
@@ -97,21 +103,29 @@ function UserLists({ userId }: { userId: string }) {
           <Link href="/lists">Create Your First List</Link>
         </Button>
       </div>
-    )
+    );
   }
 
   return (
     <div className="grid gap-4">
       {lists.map((list) => (
-        <Card key={list.id} className="bg-white/5 border-white/10 backdrop-blur-sm">
+        <Card
+          key={list.id}
+          className="bg-white/5 border-white/10 backdrop-blur-sm"
+        >
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-white text-lg">{list.name}</CardTitle>
-              <Badge variant="secondary" className="bg-purple-600/20 text-purple-300">
+              <Badge
+                variant="secondary"
+                className="bg-purple-600/20 text-purple-300"
+              >
                 {list.type}
               </Badge>
             </div>
-            {list.description && <p className="text-slate-400 text-sm">{list.description}</p>}
+            {list.description && (
+              <p className="text-slate-400 text-sm">{list.description}</p>
+            )}
           </CardHeader>
           <CardContent className="pt-0">
             <div className="flex items-center gap-2 text-sm text-slate-400">
@@ -135,7 +149,9 @@ function UserLists({ userId }: { userId: string }) {
                 ))}
                 {list.list_items.length > 4 && (
                   <div className="w-12 h-18 bg-white/10 rounded flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs text-white">+{list.list_items.length - 4}</span>
+                    <span className="text-xs text-white">
+                      +{list.list_items.length - 4}
+                    </span>
                   </div>
                 )}
               </div>
@@ -144,141 +160,163 @@ function UserLists({ userId }: { userId: string }) {
         </Card>
       ))}
     </div>
-  )
+  );
 }
 
 interface ProfileData {
-  user: any
-  profile: any
+  user: any;
+  profile: any;
   stats: {
-    lists: number
-    friends: number
-    activities: number
-  }
+    lists: number;
+    friends: number;
+    activities: number;
+  };
 }
 
 export default function ProfilePage() {
-  const [profileData, setProfileData] = useState<ProfileData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-  const isMobile = useIsMobile()
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     async function loadProfile() {
       try {
         if (typeof window !== "undefined") {
-          const keysToRemove: string[] = []
+          const keysToRemove: string[] = [];
           for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i)
-            if (key && (key.includes("profile") || key.includes("user_data") || key.includes("cached"))) {
-              keysToRemove.push(key)
+            const key = localStorage.key(i);
+            if (
+              key &&
+              (key.includes("profile") ||
+                key.includes("user_data") ||
+                key.includes("cached"))
+            ) {
+              keysToRemove.push(key);
             }
           }
-          keysToRemove.forEach((key) => localStorage.removeItem(key))
-          console.log("[v0] Cleared cached profile data from localStorage")
+          keysToRemove.forEach((key) => localStorage.removeItem(key));
+          console.log("[v0] Cleared cached profile data from localStorage");
         }
 
-        console.log("[v0] === PROFILE PAGE LOAD ===")
-        const supabase = createClient()
+        console.log("[v0] === PROFILE PAGE LOAD ===");
+        const supabase = createClient();
 
         if (!supabase) {
-          console.error("[v0] Supabase client not available")
-          router.push("/auth/login")
-          return
+          console.error("[v0] Supabase client not available");
+          router.push("/auth/login");
+          return;
         }
 
         const {
           data: { session },
           error: sessionError,
-        } = await supabase.auth.getSession()
+        } = await supabase.auth.getSession();
 
         if (sessionError || !session) {
-          console.error("[v0] Session error or no session:", sessionError)
-          console.log("[v0] Redirecting to login - no valid session")
-          router.push("/auth/login")
-          return
+          console.error("[v0] Session error or no session:", sessionError);
+          console.log("[v0] Redirecting to login - no valid session");
+          router.push("/auth/login");
+          return;
         }
 
-        const user = session.user
+        const user = session.user;
 
-        console.log("[v0] ===== PROFILE DEBUG INFO =====")
-        console.log("[v0] Authenticated User ID:", user.id)
-        console.log("[v0] Authenticated User Email:", user.email)
-        console.log("[v0] User created at:", user.created_at)
-        console.log("[v0] Fetching profile for user ID:", user.id)
+        console.log("[v0] ===== PROFILE DEBUG INFO =====");
+        console.log("[v0] Authenticated User ID:", user.id);
+        console.log("[v0] Authenticated User Email:", user.email);
+        console.log("[v0] User created at:", user.created_at);
+        console.log("[v0] Fetching profile for user ID:", user.id);
 
-        const timestamp = Date.now()
+        const timestamp = Date.now();
         const { data: profile, error: profileError } = await supabase
           .from("users")
           .select("*")
           .eq("id", user.id)
-          .single()
+          .single();
 
         if (profileError) {
-          console.error("[v0] Profile fetch error:", profileError)
+          console.error("[v0] Profile fetch error:", profileError);
 
           if (profileError.code === "PGRST116") {
-            console.log("[v0] No profile found - redirecting to onboarding")
-            router.push("/onboarding")
-            return
+            console.log("[v0] No profile found - redirecting to onboarding");
+            router.push("/onboarding");
+            return;
           }
 
-          setError("Failed to load profile")
-          setLoading(false)
-          return
+          setError("Failed to load profile");
+          setLoading(false);
+          return;
         }
 
-        console.log("[v0] Profile fetched from database:")
-        console.log("[v0] - Profile ID:", profile?.id)
-        console.log("[v0] - Profile Username:", profile?.username)
-        console.log("[v0] - Profile Display Name:", profile?.display_name)
-        console.log("[v0] - Profile Email (from auth):", user.email)
+        console.log("[v0] Profile fetched from database:");
+        console.log("[v0] - Profile ID:", profile?.id);
+        console.log("[v0] - Profile Username:", profile?.username);
+        console.log("[v0] - Profile Display Name:", profile?.display_name);
+        console.log("[v0] - Profile Email (from auth):", user.email);
 
         if (profile.id !== user.id) {
-          console.error("[v0] CRITICAL: Profile ID mismatch!")
-          console.error("[v0] Expected user ID:", user.id)
-          console.error("[v0] Got profile ID:", profile.id)
-          setError("Profile data mismatch - please contact support")
-          setLoading(false)
-          return
+          console.error("[v0] CRITICAL: Profile ID mismatch!");
+          console.error("[v0] Expected user ID:", user.id);
+          console.error("[v0] Got profile ID:", profile.id);
+          setError("Profile data mismatch - please contact support");
+          setLoading(false);
+          return;
         }
 
-        console.log("[v0] ✓ Profile ID matches authenticated user ID")
-        console.log("[v0] ===== END DEBUG INFO =====")
+        console.log("[v0] ✓ Profile ID matches authenticated user ID");
+        console.log("[v0] ===== END DEBUG INFO =====");
 
         if (!profile?.username) {
-          console.log("[v0] User needs onboarding")
-          router.push("/onboarding")
-          return
+          console.log("[v0] User needs onboarding");
+          router.push("/onboarding");
+          return;
         }
 
-        console.log("[v0] Profile loaded successfully:", profile.username)
+        console.log("[v0] Profile loaded successfully:", profile.username);
 
-        const [listsResult, friendsResult, activitiesResult] = await Promise.allSettled([
-          supabase.from("lists").select("id").eq("user_id", user.id),
-          supabase.from("friends").select("id").eq("user_id", user.id).eq("status", "accepted"),
-          supabase.from("feed_activities").select("id").eq("user_id", user.id),
-        ])
+        const [listsResult, friendsResult, activitiesResult] =
+          await Promise.allSettled([
+            supabase.from("lists").select("id").eq("user_id", user.id),
+            supabase
+              .from("friends")
+              .select("id")
+              .eq("user_id", user.id)
+              .eq("status", "accepted"),
+            supabase
+              .from("feed_activities")
+              .select("id")
+              .eq("user_id", user.id),
+          ]);
 
         const stats = {
-          lists: listsResult.status === "fulfilled" ? listsResult.value.data?.length || 0 : 0,
-          friends: friendsResult.status === "fulfilled" ? friendsResult.value.data?.length || 0 : 0,
-          activities: activitiesResult.status === "fulfilled" ? activitiesResult.value.data?.length || 0 : 0,
-        }
+          lists:
+            listsResult.status === "fulfilled"
+              ? listsResult.value.data?.length || 0
+              : 0,
+          friends:
+            friendsResult.status === "fulfilled"
+              ? friendsResult.value.data?.length || 0
+              : 0,
+          activities:
+            activitiesResult.status === "fulfilled"
+              ? activitiesResult.value.data?.length || 0
+              : 0,
+        };
 
-        console.log("[v0] Profile stats:", stats)
-        setProfileData({ user, profile, stats })
+        console.log("[v0] Profile stats:", stats);
+        setProfileData({ user, profile, stats });
       } catch (error) {
-        console.error("[v0] Profile page error:", error)
-        setError("An unexpected error occurred")
+        console.error("[v0] Profile page error:", error);
+        setError("An unexpected error occurred");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
-    loadProfile()
-  }, [router])
+    loadProfile();
+  }, [router]);
 
   if (loading) {
     return (
@@ -288,7 +326,7 @@ export default function ProfilePage() {
           <div className="text-white">Loading your profile...</div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -297,7 +335,10 @@ export default function ProfilePage() {
         <div className="text-center">
           <div className="text-red-400 mb-4">{error}</div>
           <div className="space-x-4">
-            <Button onClick={() => window.location.reload()} className="bg-purple-600 hover:bg-purple-700">
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
               Try Again
             </Button>
             <Button
@@ -310,7 +351,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!profileData) {
@@ -318,39 +359,62 @@ export default function ProfilePage() {
       <div className="min-h-screen pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-white">Profile not found</div>
       </div>
-    )
+    );
   }
 
-  const { user, profile, stats } = profileData
+  const { user, profile, stats } = profileData;
 
   return (
     <div className="min-h-screen pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <div className="container mx-auto px-4 py-8">
         <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-2">
-            <Film className="h-8 w-8 text-purple-400" />
-            <h1 className="text-2xl font-bold text-white">Reel Friends</h1>
+            <Image
+              src="/logo.svg"
+              alt="Castd logo"
+              width={32}
+              height={32}
+              className="h-8 w-8"
+              priority
+            />
+            <h1 className="text-2xl font-bold text-white">Castd</h1>
           </div>
           <nav className="flex flex-wrap gap-2">
-            <Button variant="ghost" asChild className="text-white hover:bg-white/10">
+            <Button
+              variant="ghost"
+              asChild
+              className="text-white hover:bg-white/10"
+            >
               <Link href="/feed">
                 <Activity className="h-4 w-4 mr-2" />
                 Feed
               </Link>
             </Button>
-            <Button variant="ghost" asChild className="text-white hover:bg-white/10">
+            <Button
+              variant="ghost"
+              asChild
+              className="text-white hover:bg-white/10"
+            >
               <Link href="/explore">
                 <Search className="h-4 w-4 mr-2" />
                 Explore
               </Link>
             </Button>
-            <Button variant="ghost" asChild className="text-white hover:bg-white/10">
+            <Button
+              variant="ghost"
+              asChild
+              className="text-white hover:bg-white/10"
+            >
               <Link href="/friends">
                 <Users className="h-4 w-4 mr-2" />
                 Friends
               </Link>
             </Button>
-            <Button variant="ghost" asChild className="text-white hover:bg-white/10">
+            <Button
+              variant="ghost"
+              asChild
+              className="text-white hover:bg-white/10"
+            >
               <Link href="/settings">
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -381,7 +445,11 @@ export default function ProfilePage() {
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-200">
                       {profile.display_name || profile.username}
                     </h2>
-                    <Button size="sm" asChild className="bg-purple-600 hover:bg-purple-700 shrink-0">
+                    <Button
+                      size="sm"
+                      asChild
+                      className="bg-purple-600 hover:bg-purple-700 shrink-0"
+                    >
                       <Link href="/settings">
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Profile
@@ -391,20 +459,34 @@ export default function ProfilePage() {
 
                   <p className="text-slate-400 mb-1">@{profile.username}</p>
 
-                  {profile.bio && <p className="text-slate-300 mb-4">{profile.bio}</p>}
+                  {profile.bio && (
+                    <p className="text-slate-300 mb-4">{profile.bio}</p>
+                  )}
 
                   <div className="flex justify-center sm:justify-start gap-4 sm:gap-6 flex-wrap">
                     <div className="text-center">
-                      <div className="text-xl sm:text-2xl font-bold text-slate-200">{stats.lists}</div>
-                      <div className="text-xs sm:text-sm text-slate-400">Lists</div>
+                      <div className="text-xl sm:text-2xl font-bold text-slate-200">
+                        {stats.lists}
+                      </div>
+                      <div className="text-xs sm:text-sm text-slate-400">
+                        Lists
+                      </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl sm:text-2xl font-bold text-slate-200">{stats.friends}</div>
-                      <div className="text-xs sm:text-sm text-slate-400">Friends</div>
+                      <div className="text-xl sm:text-2xl font-bold text-slate-200">
+                        {stats.friends}
+                      </div>
+                      <div className="text-xs sm:text-sm text-slate-400">
+                        Friends
+                      </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl sm:text-2xl font-bold text-slate-200">{stats.activities}</div>
-                      <div className="text-xs sm:text-sm text-slate-400">Activities</div>
+                      <div className="text-xl sm:text-2xl font-bold text-slate-200">
+                        {stats.activities}
+                      </div>
+                      <div className="text-xs sm:text-sm text-slate-400">
+                        Activities
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -435,9 +517,12 @@ export default function ProfilePage() {
             <TabsContent value="activity" className="mt-6">
               <div className="text-center py-12">
                 <Activity className="h-12 w-12 mx-auto mb-4 text-slate-400" />
-                <h3 className="text-lg font-semibold text-white mb-2">Activity Timeline</h3>
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Activity Timeline
+                </h3>
                 <p className="text-slate-400 mb-4">
-                  Your recent activities will appear here as you interact with movies and friends.
+                  Your recent activities will appear here as you interact with
+                  movies and friends.
                 </p>
                 <Button asChild className="bg-purple-600 hover:bg-purple-700">
                   <Link href="/explore">Start Exploring</Link>
@@ -448,5 +533,5 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
