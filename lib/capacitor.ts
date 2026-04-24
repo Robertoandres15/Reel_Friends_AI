@@ -1,5 +1,6 @@
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
+import { SplashScreen } from "@capacitor/splash-screen";
 import { App } from "@capacitor/app";
 import { Keyboard } from "@capacitor/keyboard";
 
@@ -20,9 +21,16 @@ export const initializeCapacitor = async () => {
         console.log("[v0] App state changed. Active:", isActive);
       });
 
+      // Hide splash screen after app is ready
+      await SplashScreen.hide({ fadeOutDuration: 300 });
+
       console.log("[v0] Capacitor initialization complete");
     } catch (error) {
       console.error("[v0] Error initializing Capacitor:", error);
+      // Still try to hide splash even if other init steps failed
+      try {
+        await SplashScreen.hide();
+      } catch (_) {}
     }
   } else {
     console.log(
