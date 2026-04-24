@@ -12,6 +12,8 @@ PODS:
     - Capacitor
   - CapacitorPluginSafeArea (4.0.3):
     - Capacitor
+  - CapacitorSplashScreen (7.0.5):
+    - Capacitor
   - CapacitorStatusBar (7.0.6):
     - Capacitor
 
@@ -23,6 +25,7 @@ DEPENDENCIES:
   - "CapacitorHaptics (from `../../node_modules/.pnpm/@capacitor+haptics@7.0.5_@capacitor+core@7.6.2/node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../node_modules/.pnpm/@capacitor+keyboard@7.0.6_@capacitor+core@7.6.2/node_modules/@capacitor/keyboard`)"
   - "CapacitorPluginSafeArea (from `../../node_modules/.pnpm/capacitor-plugin-safe-area@4.0.3_@capacitor+core@7.6.2/node_modules/capacitor-plugin-safe-area`)"
+  - "CapacitorSplashScreen (from `../../node_modules/.pnpm/@capacitor+splash-screen@7.0.5_@capacitor+core@7.6.2/node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../node_modules/.pnpm/@capacitor+status-bar@7.0.6_@capacitor+core@7.6.2/node_modules/@capacitor/status-bar`)"
 
 EXTERNAL SOURCES:
@@ -40,6 +43,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/.pnpm/@capacitor+keyboard@7.0.6_@capacitor+core@7.6.2/node_modules/@capacitor/keyboard"
   CapacitorPluginSafeArea:
     :path: "../../node_modules/.pnpm/capacitor-plugin-safe-area@4.0.3_@capacitor+core@7.6.2/node_modules/capacitor-plugin-safe-area"
+  CapacitorSplashScreen:
+    :path: "../../node_modules/.pnpm/@capacitor+splash-screen@7.0.5_@capacitor+core@7.6.2/node_modules/@capacitor/splash-screen"
   CapacitorStatusBar:
     :path: "../../node_modules/.pnpm/@capacitor+status-bar@7.0.6_@capacitor+core@7.6.2/node_modules/@capacitor/status-bar"
 
@@ -51,8 +56,9 @@ SPEC CHECKSUMS:
   CapacitorHaptics: ec024a10130c230743219149c76a02da5cff6aed
   CapacitorKeyboard: c94c84755e1500d2c6dccd74bad018bb359e3543
   CapacitorPluginSafeArea: 0b05430642c0da92b5f174e900ccecf39a71e2c3
+  CapacitorSplashScreen: b3d12b4324d93ce605fe57f05a199ade7f26189e
   CapacitorStatusBar: a3acb591ff56301e28aa1a01791ba74a8e1faabb
 
-PODFILE CHECKSUM: 10e3ddf82dda1748ed644d13fa06ac00133e6aad
+PODFILE CHECKSUM: 153cc946971e639dd32c68883b07c6b2df0adb20
 
 COCOAPODS: 1.16.2

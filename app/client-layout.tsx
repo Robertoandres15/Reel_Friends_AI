@@ -7,6 +7,7 @@ import { MobileInitializer } from "@/components/mobile-initializer";
 import { initializeCapacitor } from "@/lib/capacitor";
 import { SupabaseAuthHandler } from "@/components/supabase-auth-handler";
 import { useSafeAreaInsets } from "@/hooks/use-safe-area-insets";
+import { PageLoader } from "@/components/page-loader";
 
 function CapacitorInitializer() {
   useEffect(() => {
@@ -22,7 +23,6 @@ function SafeAreaInitializer() {
   return null;
 }
 
-
 export default function ClientLayout({
   children,
 }: Readonly<{
@@ -34,7 +34,7 @@ export default function ClientLayout({
       <CapacitorInitializer />
       <SafeAreaInitializer />
       <SupabaseAuthHandler />
-      <Suspense fallback={null}>{children}</Suspense>
+      <Suspense fallback={<PageLoader />}>{children}</Suspense>
       <Analytics />
       <script
         dangerouslySetInnerHTML={{

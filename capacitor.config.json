@@ -7,13 +7,16 @@
   },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 2000,
+      "launchShowDuration": 1,
+      "launchAutoHide": false,
       "backgroundColor": "#1a1a2e",
       "showSpinner": false,
       "androidSplashResourceName": "splash",
       "androidScaleType": "CENTER_CROP",
       "iosSpinnerStyle": "small",
-      "spinnerColor": "#7c3aed"
+      "spinnerColor": "#7c3aed",
+      "splashFullScreen": true,
+      "splashImmersive": true
     },
     "StatusBar": {
       "style": "dark",
