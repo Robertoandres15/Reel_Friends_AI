@@ -43,10 +43,10 @@ export default function SupportPage() {
           <p className="text-slate-300">
             Email{" "}
             <a
-              href="mailto:support@reel-friends.ai"
+              href="mailto:Roberto@reel-friends.ai"
               className="text-purple-400 underline underline-offset-4"
             >
-              support@reel-friends.ai
+              Roberto@reel-friends.ai
             </a>{" "}
             and we'll get back to you within 1–2 business days.
           </p>
