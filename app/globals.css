@@ -94,3 +94,41 @@ body.keyboard-open .mobile-bottom-nav {
 body.keyboard-open {
   padding-bottom: 0 !important;
 }
+
+/* ==========================================================================
+   Native-feel rules — scoped to .capacitor-native so the web app on Vercel
+   is completely unaffected. The class is added to <body> in lib/capacitor.ts
+   only when running inside the native iOS/Android shell.
+   ========================================================================== */
+
+/* Make the whole UI feel like an app, not a web page: no text selection,
+   no long-press callout menus, no blue tap-highlight flash. */
+.capacitor-native,
+.capacitor-native * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* But still allow selection/editing inside real text fields. */
+.capacitor-native input,
+.capacitor-native textarea,
+.capacitor-native [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Kill the rubber-band overscroll that exposes a blank page edge — a classic
+   "this is a browser" giveaway. */
+.capacitor-native,
+.capacitor-native body {
+  overscroll-behavior: none;
+}
+
+/* Prevent images from being draggable/long-pressable like web images. */
+.capacitor-native img {
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: auto;
+}

@@ -1,326 +1,122 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Search, User, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { FriendRecommendations } from "@/components/friend-recommendations";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { MobileNavigation } from "@/components/mobile-navigation";
 import { DismissibleMovieSuggestions } from "@/components/dismissible-movie-suggestions";
 import { ReelClubMatches } from "@/components/reel-club-matches";
+import { PageLoader } from "@/components/page-loader";
 
-async function AIMovieSuggestions() {
-  let supabase;
-  let userProfile = null;
-  let user = null;
+const FALLBACK_MOVIES = [
+  {
+    id: 550,
+    title: "Fight Club",
+    overview:
+      "An insomniac office worker and a devil-may-care soap maker form an underground fight club.",
+    poster_path: "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+    vote_average: 8.4,
+    release_date: "1999-10-15",
+  },
+  {
+    id: 13,
+    title: "Forrest Gump",
+    overview:
+      "The presidencies of Kennedy and Johnson, Vietnam, Watergate, and other history unfold through the perspective of an Alabama man.",
+    poster_path: "/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
+    vote_average: 8.5,
+    release_date: "1994-07-06",
+  },
+  {
+    id: 155,
+    title: "The Dark Knight",
+    overview:
+      "Batman raises the stakes in his war on crime with the help of Lt. Jim Gordon and District Attorney Harvey Dent.",
+    poster_path: "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    vote_average: 9.0,
+    release_date: "2008-07-18",
+  },
+  {
+    id: 680,
+    title: "Pulp Fiction",
+    overview:
+      "The lives of two mob hitmen, a boxer, a gangster and his wife intertwine in four tales of violence and redemption.",
+    poster_path: "/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+    vote_average: 8.9,
+    release_date: "1994-10-14",
+  },
+];
 
-  if (
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  ) {
-    try {
-      supabase = await createClient();
-    } catch (error) {
-      supabase = null;
-    }
-  }
+const DEFAULT_GENRES = ["28", "12", "878", "35"]; // Action, Adventure, Sci-Fi, Comedy
 
-  if (supabase) {
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-    user = authUser;
+function AIMovieSuggestions({ userProfile }: { userProfile: any }) {
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [movieGenres, setMovieGenres] = useState<string[]>(DEFAULT_GENRES);
+  const [isPersonalized, setIsPersonalized] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-    console.log("[v0] AIMovieSuggestions - User ID:", user?.id);
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      let genres = DEFAULT_GENRES;
+      let personalized = false;
 
-    if (user) {
-      const { data: profile } = await supabase
-        .from("users")
-        .select("username, preferred_movie_genres, preferred_series_genres")
-        .eq("id", user.id)
-        .single();
-
-      userProfile = profile;
-      console.log(
-        "[v0] AIMovieSuggestions - Profile data:",
-        JSON.stringify(profile),
-      );
-
-      if (!profile?.username) {
-        console.log(
-          "[v0] AIMovieSuggestions - No username found, redirecting to onboarding",
-        );
-        redirect("/onboarding");
-      } else {
-        console.log(
-          "[v0] AIMovieSuggestions - Profile valid, username:",
-          profile.username,
-        );
+      if (
+        userProfile?.preferred_movie_genres &&
+        userProfile.preferred_movie_genres.length > 0
+      ) {
+        genres = userProfile.preferred_movie_genres;
+        personalized = true;
       }
-    }
-  }
 
-  let userRecommendations = [];
-  const recommendationGenres = new Set<string>();
-  let isPersonalized = false;
-
-  if (supabase && user) {
-    try {
-      // Get user's recommendation list items
-      const { data: recommendationsList } = await supabase
-        .from("list_items")
-        .select(
-          `
-          tmdb_id,
-          media_type,
-          title,
-          poster_path,
-          overview,
-          release_date,
-          rating,
-          lists!inner(type, user_id)
-        `,
-        )
-        .eq("lists.user_id", user.id)
-        .eq("lists.type", "recommendations")
-        .limit(20); // Get more items for better genre analysis
-
-      userRecommendations = recommendationsList || [];
-      console.log(
-        "[v0] Found user recommendations:",
-        userRecommendations.length,
-      );
-
-      if (userRecommendations.length > 0) {
-        // Extract genres from user's existing recommendations using TMDB API
-        for (const item of userRecommendations.slice(0, 10)) {
-          // Limit API calls
-          try {
-            const endpoint = item.media_type === "movie" ? "movie" : "tv";
-            const tmdbUrl = `https://api.themoviedb.org/3/${endpoint}/${item.tmdb_id}`;
-
-            const headers: Record<string, string> = {
-              "Content-Type": "application/json",
-            };
-
-            // Use the same authentication logic as the TMDB client
-            const token =
-              process.env.TMDB_API_READ_ACCESS_TOKEN ||
-              process.env.TMBD_API_KEY;
-            if (token) {
-              if (token.length <= 40 && !token.includes(".")) {
-                // v3 API key
-                const response = await fetch(`${tmdbUrl}?api_key=${token}`, {
-                  headers,
-                });
-                if (response.ok) {
-                  const data = await response.json();
-                  data.genres?.forEach((genre: any) =>
-                    recommendationGenres.add(genre.id.toString()),
-                  );
-                }
-              } else {
-                // v4 Read Access Token
-                headers.Authorization = `Bearer ${token}`;
-                const response = await fetch(tmdbUrl, { headers });
-                if (response.ok) {
-                  const data = await response.json();
-                  data.genres?.forEach((genre: any) =>
-                    recommendationGenres.add(genre.id.toString()),
-                  );
-                }
-              }
-            }
-          } catch (error) {
-            console.log(
-              "[v0] Error fetching genres for item:",
-              item.title,
-              error,
-            );
+      try {
+        const page = Math.floor(Math.random() * 5) + 1;
+        const res = await fetch(
+          `/api/tmdb/discover?with_genres=${genres.join(",")}&sort_by=popularity.desc&page=${page}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const results = (data.results || []).slice(0, 10);
+          if (active && results.length > 0) {
+            setSuggestions(results);
+            setMovieGenres(genres);
+            setIsPersonalized(personalized);
+            setLoading(false);
+            return;
           }
         }
-
-        console.log(
-          "[v0] Extracted genres from recommendations:",
-          Array.from(recommendationGenres),
-        );
-
-        if (recommendationGenres.size > 0) {
-          isPersonalized = true;
-        }
+      } catch {
+        // fall through to fallback below
       }
-    } catch (error) {
-      console.log("[v0] Error fetching user recommendations:", error);
-    }
-  }
 
-  if (isPersonalized && recommendationGenres.size > 0) {
-    try {
-      const genreIds = Array.from(recommendationGenres).slice(0, 4).join(",");
-      const recommendationIds = userRecommendations.map((item) => item.tmdb_id);
-
-      console.log(
-        "[v0] Generating personalized recommendations with genres:",
-        genreIds,
-      );
-
-      // Use the discover API with proper authentication
-      const discoverUrl = `/api/tmdb/discover?with_genres=${genreIds}&sort_by=popularity.desc&page=${Math.floor(Math.random() * 3) + 1}`;
-
-      const response = await fetch(discoverUrl);
-
-      if (response.ok) {
-        const data = await response.json();
-        const suggestions =
-          data.results
-            ?.filter((movie: any) => !recommendationIds.includes(movie.id))
-            .slice(0, 10) || [];
-
-        if (suggestions.length > 0) {
-          console.log(
-            "[v0] Found",
-            suggestions.length,
-            "personalized suggestions based on recommendations",
-          );
-          return renderMovieSuggestions(
-            suggestions,
-            Array.from(recommendationGenres),
-            userProfile,
-            true,
-          );
-        }
-      } else {
-        console.log(
-          "[v0] Discover API failed, falling back to profile preferences",
-        );
+      if (active) {
+        setSuggestions(FALLBACK_MOVIES);
+        setMovieGenres(genres);
+        setIsPersonalized(personalized);
+        setLoading(false);
       }
-    } catch (error) {
-      console.log("[v0] Error generating personalized recommendations:", error);
-    }
-  }
+    };
 
-  const defaultGenres = ["28", "12", "878", "35"]; // Action, Adventure, Sci-Fi, Comedy
-  let movieGenres = defaultGenres;
+    load();
+    return () => {
+      active = false;
+    };
+  }, [userProfile]);
 
-  // Use user's profile preferences if available
-  if (
-    userProfile?.preferred_movie_genres &&
-    userProfile.preferred_movie_genres.length > 0
-  ) {
-    movieGenres = userProfile.preferred_movie_genres;
-    console.log("[v0] Using user profile movie genres:", movieGenres);
-  } else if (recommendationGenres.size > 0) {
-    // Use genres from recommendations even if API calls failed
-    movieGenres = Array.from(recommendationGenres).slice(0, 4);
-    isPersonalized = true;
-    console.log(
-      "[v0] Using genres extracted from recommendations:",
-      movieGenres,
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
+      </div>
     );
   }
 
-  const fallbackMovies = [
-    {
-      id: 550,
-      title: "Fight Club",
-      overview:
-        "An insomniac office worker and a devil-may-care soap maker form an underground fight club.",
-      poster_path: "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
-      vote_average: 8.4,
-      release_date: "1999-10-15",
-    },
-    {
-      id: 13,
-      title: "Forrest Gump",
-      overview:
-        "The presidencies of Kennedy and Johnson, Vietnam, Watergate, and other history unfold through the perspective of an Alabama man.",
-      poster_path: "/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
-      vote_average: 8.5,
-      release_date: "1994-07-06",
-    },
-    {
-      id: 155,
-      title: "The Dark Knight",
-      overview:
-        "Batman raises the stakes in his war on crime with the help of Lt. Jim Gordon and District Attorney Harvey Dent.",
-      poster_path: "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
-      vote_average: 9.0,
-      release_date: "2008-07-18",
-    },
-    {
-      id: 680,
-      title: "Pulp Fiction",
-      overview:
-        "The lives of two mob hitmen, a boxer, a gangster and his wife intertwine in four tales of violence and redemption.",
-      poster_path: "/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
-      vote_average: 8.9,
-      release_date: "1994-10-14",
-    },
-  ];
-
-  try {
-    const genreIds = movieGenres.join(",");
-    const discoverUrl = `/api/tmdb/discover?with_genres=${genreIds}&sort_by=popularity.desc&page=${Math.floor(Math.random() * 5) + 1}`;
-
-    console.log("[v0] Fetching recommendations from discover API");
-
-    const response = await fetch(discoverUrl);
-
-    if (response.ok) {
-      const data = await response.json();
-      console.log(
-        "[v0] Discover API success, got",
-        data.results?.length || 0,
-        "movies",
-      );
-
-      const suggestions = data.results?.slice(0, 10) || [];
-
-      if (suggestions.length === 0) {
-        console.log(
-          "[v0] No movies returned from discover API, using fallback",
-        );
-        return renderMovieSuggestions(
-          fallbackMovies,
-          movieGenres,
-          userProfile,
-          isPersonalized,
-        );
-      }
-
-      return renderMovieSuggestions(
-        suggestions,
-        movieGenres,
-        userProfile,
-        isPersonalized,
-      );
-    } else {
-      console.log("[v0] Discover API failed, using fallback movies");
-      return renderMovieSuggestions(
-        fallbackMovies,
-        movieGenres,
-        userProfile,
-        isPersonalized,
-      );
-    }
-  } catch (error) {
-    console.log("[v0] Error fetching from discover API:", error);
-    return renderMovieSuggestions(
-      fallbackMovies,
-      movieGenres,
-      userProfile,
-      isPersonalized,
-    );
-  }
-}
-
-function renderMovieSuggestions(
-  suggestions: any[],
-  movieGenres: string[],
-  userProfile: any,
-  isPersonalized = false,
-) {
   return (
     <DismissibleMovieSuggestions
       initialSuggestions={suggestions}
@@ -331,66 +127,51 @@ function renderMovieSuggestions(
   );
 }
 
-export default async function FeedPage() {
-  console.log("[v0] FeedPage - Starting to load");
+export default function FeedPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<any>(null);
 
-  let supabase;
-  let user = null;
-  let profile = null;
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      const supabase = createClient();
 
-  if (
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  ) {
-    try {
-      supabase = await createClient();
-      console.log("[v0] FeedPage - Supabase client created");
-    } catch (error) {
-      console.log("[v0] FeedPage - Error creating Supabase client:", error);
-      supabase = null;
-    }
-  }
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-  if (supabase) {
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-    user = authUser;
+      if (!user) {
+        router.replace("/auth/login");
+        return;
+      }
 
-    console.log(
-      "[v0] FeedPage - User authenticated:",
-      !!user,
-      "User ID:",
-      user?.id,
-    );
-
-    if (user) {
-      const { data: userProfile } = await supabase
+      const { data: profile } = await supabase
         .from("users")
         .select("username, preferred_movie_genres, preferred_series_genres")
         .eq("id", user.id)
         .single();
 
-      profile = userProfile;
-      console.log("[v0] FeedPage - Profile fetched:", JSON.stringify(profile));
-
       if (!profile?.username) {
-        console.log(
-          "[v0] FeedPage - No username found, redirecting to onboarding",
-        );
-        redirect("/onboarding");
-      } else {
-        console.log(
-          "[v0] FeedPage - Profile valid, proceeding to render feed for:",
-          profile.username,
-        );
+        router.replace("/onboarding");
+        return;
       }
-    }
-  }
 
-  console.log("[v0] FeedPage - Loading AI movie suggestions");
-  const aiMovieSuggestionsContent = await AIMovieSuggestions();
-  console.log("[v0] FeedPage - AI movie suggestions loaded, rendering page");
+      if (active) {
+        setUserProfile(profile);
+        setLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      active = false;
+    };
+  }, [router]);
+
+  if (loading) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="min-h-screen pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -483,7 +264,7 @@ export default async function FeedPage() {
             </TabsContent>
 
             <TabsContent value="recommendations" className="mt-6">
-              {aiMovieSuggestionsContent}
+              <AIMovieSuggestions userProfile={userProfile} />
             </TabsContent>
           </Tabs>
         </div>

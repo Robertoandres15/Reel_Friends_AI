@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -41,17 +41,18 @@ interface List {
 }
 
 export default function ListDetailPage() {
-  const params = useParams()
+  const searchParams = useSearchParams()
+  const id = searchParams.get("id")
   const router = useRouter()
   const { toast } = useToast()
   const [list, setList] = useState<List | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (params.id) {
-      loadList(params.id as string)
+    if (id) {
+      loadList(id)
     }
-  }, [params.id])
+  }, [id])
 
   const loadList = async (listId: string) => {
     try {
@@ -119,7 +120,7 @@ export default function ListDetailPage() {
   }
 
   const getItemRoute = (item: ListItem) => {
-    return `/explore/${item.media_type}/${item.tmdb_id}`
+    return `/explore/${item.media_type}?id=${item.tmdb_id}`
   }
 
   if (isLoading) {

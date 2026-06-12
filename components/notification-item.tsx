@@ -79,7 +79,7 @@ export function NotificationItem({
       case "list_like":
       case "list_shared":
         return notification.related_id
-          ? `/lists/${notification.related_id}`
+          ? `/lists/detail?id=${notification.related_id}`
           : "/lists";
       case "recommendation_added_to_wishlist":
         return "/profile";

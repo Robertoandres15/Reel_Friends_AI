@@ -1,4 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr"
+import { createClient as createNativeSupabaseClient } from "@supabase/supabase-js"
+import { Capacitor } from "@capacitor/core"
 
 let client: ReturnType<typeof createBrowserClient> | null = null
 
@@ -7,7 +9,29 @@ export function createClient() {
     return client
   }
 
-  client = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  if (Capacitor.isNativePlatform()) {
+    // The native WebView runs on capacitor://localhost where document.cookie
+    // is unreliable, so the cookie-backed @supabase/ssr client loses the
+    // session. Store it in localStorage instead; the web build keeps cookies
+    // for SSR.
+    client = createNativeSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        auth: {
+          storage: window.localStorage,
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: false,
+        },
+      },
+    ) as ReturnType<typeof createBrowserClient>
+  } else {
+    client = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    )
+  }
 
   return client
 }

@@ -2,10 +2,10 @@
   "appId": "com.reelfriendsapp",
   "appName": "Castd",
   "webDir": "out",
-  "server": {
-    "url": "https://www.reel-friends.ai/"
-  },
   "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
     "SplashScreen": {
       "launchShowDuration": 1,
       "launchAutoHide": false,
