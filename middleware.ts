@@ -8,6 +8,8 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/api") ||
     request.nextUrl.pathname.startsWith("/auth") ||
     request.nextUrl.pathname.startsWith("/_vercel") ||
+    request.nextUrl.pathname.startsWith("/support") ||
+    request.nextUrl.pathname.startsWith("/legal") ||
     request.nextUrl.pathname.includes(".") ||
     request.nextUrl.pathname === "/"
   ) {
@@ -76,7 +78,8 @@ export async function middleware(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/login") &&
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/signup") &&
-    !request.nextUrl.pathname.startsWith("/legal/privacy") &&
+    !request.nextUrl.pathname.startsWith("/legal") &&
+    !request.nextUrl.pathname.startsWith("/support") &&
     request.nextUrl.pathname !== "/"
   ) {
     const url = request.nextUrl.clone();
