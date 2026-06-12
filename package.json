@@ -1,4 +1,25 @@
 {
+  "name": "reel-friends",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "build:mobile": "next build && npx cap sync",
+    "cap:add": "npx cap add",
+    "cap:copy": "npx cap copy",
+    "cap:open": "npx cap open",
+    "cap:run": "npx cap run",
+    "cap:sync": "npx cap sync",
+    "dev": "next dev",
+    "lint": "next lint",
+    "mobile:android": "npm run build:mobile && npx cap open android",
+    "mobile:build": "node scripts/build-mobile.js",
+    "mobile:ios": "npm run build:mobile && npx cap open ios",
+    "mobile:run:android": "npm run build:mobile && npx cap run android",
+    "mobile:run:ios": "npm run build:mobile && npx cap run ios",
+    "mobile:setup": "node scripts/setup-mobile.js",
+    "start": "next start"
+  },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
     "@capacitor/app": "^7.1.0",
@@ -7,7 +28,6 @@
     "@capacitor/haptics": "^7.0.2",
     "@capacitor/ios": "^7.4.3",
     "@capacitor/keyboard": "^7.0.3",
-    "@capacitor/splash-screen": "^7.0.5",
     "@capacitor/status-bar": "^7.0.3",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -41,7 +61,6 @@
     "web-push": "3.6.7"
   },
   "devDependencies": {
-    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^7.4.3",
     "@types/node": "^22",
     "@types/react": "^19",
@@ -49,27 +68,6 @@
     "postcss": "^8.5",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
-  },
-  "name": "reel-friends",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "build": "next build",
-    "build:mobile": "next build && npx cap sync",
-    "cap:add": "npx cap add",
-    "cap:copy": "npx cap copy",
-    "cap:open": "npx cap open",
-    "cap:run": "npx cap run",
-    "cap:sync": "npx cap sync",
-    "dev": "next dev",
-    "lint": "next lint",
-    "start": "next start",
-    "mobile:setup": "node scripts/setup-mobile.js",
-    "mobile:build": "node scripts/build-mobile.js",
-    "mobile:android": "npm run build:mobile && npx cap open android",
-    "mobile:ios": "npm run build:mobile && npx cap open ios",
-    "mobile:run:android": "npm run build:mobile && npx cap run android",
-    "mobile:run:ios": "npm run build:mobile && npx cap run ios"
   },
   "packageManager": "pnpm@10.22.0+sha512.bf049efe995b28f527fd2b41ae0474ce29186f7edcb3bf545087bd61fbbebb2bf75362d1307fda09c2d288e1e499787ac12d4fcb617a974718a6051f2eee741c"
 }

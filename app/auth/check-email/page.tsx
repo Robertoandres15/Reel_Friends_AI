@@ -1,14 +1,7 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Mail } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Mail, Film } from "lucide-react"
+import Link from "next/link"
 
 export default function CheckEmailPage() {
   return (
@@ -16,15 +9,8 @@ export default function CheckEmailPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Image
-              src="/logo.svg"
-              alt="Castd logo"
-              width={32}
-              height={32}
-              className="h-8 w-8"
-              priority
-            />
-            <h1 className="text-2xl font-bold text-white">Castd</h1>
+            <Film className="h-8 w-8 text-purple-400" />
+            <h1 className="text-2xl font-bold text-white">Reel Friends</h1>
           </div>
         </div>
 
@@ -40,15 +26,10 @@ export default function CheckEmailPage() {
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-slate-300 text-sm">
-              Click the link in your email to verify your account and start
-              discovering movies with friends.
+              Click the link in your email to verify your account and start discovering movies with friends.
             </p>
             <div className="pt-4">
-              <Button
-                variant="outline"
-                asChild
-                className="border-white/20 text-white hover:bg-white/10 bg-transparent"
-              >
+              <Button variant="outline" asChild className="border-white/20 text-white hover:bg-white/10 bg-transparent">
                 <Link href="/auth/login">Back to Sign In</Link>
               </Button>
             </div>
@@ -56,5 +37,5 @@ export default function CheckEmailPage() {
         </Card>
       </div>
     </div>
-  );
+  )
 }
