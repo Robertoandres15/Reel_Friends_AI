@@ -1,5 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect, notFound } from "next/navigation";
+"use client";
+
+import { createClient } from "@/lib/supabase/client";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,75 +10,123 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Users, Star } from "lucide-react";
 import Link from "next/link";
 import { MobileNavigation } from "@/components/mobile-navigation";
+import { PageLoader } from "@/components/page-loader";
 import Image from "next/image";
 
-interface FriendProfilePageProps {
-  params: {
-    id: string;
-  };
-}
+export default function FriendProfilePage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const friendId = searchParams.get("id") ?? "";
 
-export default async function FriendProfilePage({
-  params,
-}: FriendProfilePageProps) {
-  const supabase = await createClient();
+  const [loading, setLoading] = useState(true);
+  const [isMissing, setIsMissing] = useState(false);
+  const [friendProfile, setFriendProfile] = useState<any>(null);
+  const [friendLists, setFriendLists] = useState<any[]>([]);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      const supabase = createClient();
 
-  if (!user) {
-    redirect("/auth/login");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", friendId)
+        .single();
+
+      if (!profile) {
+        if (active) {
+          setIsMissing(true);
+          setLoading(false);
+        }
+        return;
+      }
+
+      const { data: friendship } = await supabase
+        .from("friends")
+        .select("*")
+        .or(
+          `and(user_id.eq.${user.id},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${user.id})`,
+        )
+        .eq("status", "accepted")
+        .single();
+
+      if (!friendship) {
+        if (active) {
+          setIsMissing(true);
+          setLoading(false);
+        }
+        return;
+      }
+
+      const { data: lists } = await supabase
+        .from("lists")
+        .select(
+          `
+          *,
+          list_items(
+            id,
+            tmdb_id,
+            media_type,
+            title,
+            poster_path,
+            overview,
+            release_date,
+            rating,
+            note,
+            added_at
+          )
+        `,
+        )
+        .eq("user_id", friendId)
+        .eq("is_public", true)
+        .order("created_at", { ascending: false });
+
+      if (active) {
+        setFriendProfile(profile);
+        setFriendLists(lists || []);
+        setLoading(false);
+      }
+    };
+
+    if (friendId) load();
+    return () => {
+      active = false;
+    };
+  }, [friendId, router]);
+
+  if (loading) {
+    return <PageLoader />;
   }
 
-  // Get friend's profile
-  const { data: friendProfile } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", params.id)
-    .single();
-
-  if (!friendProfile) {
-    notFound();
+  if (isMissing || !friendProfile) {
+    return (
+      <div className="min-h-screen pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
+        <Card className="bg-slate-800/80 border-slate-600 backdrop-blur-sm max-w-md w-full">
+          <CardContent className="text-center py-12">
+            <h3 className="text-lg font-semibold text-slate-200 mb-2">
+              Profile not available
+            </h3>
+            <p className="text-slate-400 mb-6">
+              This profile doesn't exist or isn't in your friends list.
+            </p>
+            <Button asChild className="bg-purple-600 hover:bg-purple-700">
+              <Link href="/friends">Back to Friends</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
-
-  // Verify friendship exists
-  const { data: friendship } = await supabase
-    .from("friends")
-    .select("*")
-    .or(
-      `and(user_id.eq.${user.id},friend_id.eq.${params.id}),and(user_id.eq.${params.id},friend_id.eq.${user.id})`,
-    )
-    .eq("status", "accepted")
-    .single();
-
-  if (!friendship) {
-    notFound();
-  }
-
-  // Get friend's public lists
-  const { data: friendLists } = await supabase
-    .from("lists")
-    .select(
-      `
-      *,
-      list_items(
-        id,
-        tmdb_id,
-        media_type,
-        title,
-        poster_path,
-        overview,
-        release_date,
-        rating,
-        note,
-        added_at
-      )
-    `,
-    )
-    .eq("user_id", params.id)
-    .eq("is_public", true)
-    .order("created_at", { ascending: false });
 
   const recommendationsList = friendLists?.find(
     (list) => list.type === "recommendations",
@@ -166,7 +217,7 @@ export default async function FriendProfilePage({
                   {recommendationsList.list_items.map((item: any) => (
                     <Link
                       key={item.id}
-                      href={`/explore/${item.media_type}/${item.tmdb_id}`}
+                      href={`/explore/${item.media_type}?id=${item.tmdb_id}`}
                       className="block hover:bg-slate-700/40 rounded-lg transition-colors"
                     >
                       <div className="flex gap-4 p-3 rounded-lg bg-slate-700/60">
@@ -239,7 +290,7 @@ export default async function FriendProfilePage({
                     {wishlist.list_items.slice(0, 12).map((item: any) => (
                       <Link
                         key={item.id}
-                        href={`/explore/${item.media_type}/${item.tmdb_id}`}
+                        href={`/explore/${item.media_type}?id=${item.tmdb_id}`}
                         className="group block"
                       >
                         <img

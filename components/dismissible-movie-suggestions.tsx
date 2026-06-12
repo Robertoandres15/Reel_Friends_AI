@@ -242,7 +242,7 @@ export function DismissibleMovieSuggestions({
 
   const handleViewDetails = (movie: Movie) => {
     console.log("[v0] Navigating to movie details:", movie.id, movie.title)
-    router.push(`/explore/movie/${movie.id}`)
+    router.push(`/explore/movie?id=${movie.id}`)
   }
 
   const genreMap: { [key: string]: string } = {

@@ -779,7 +779,7 @@ export default function ListsPage() {
                             onClick={() => {
                               console.log("[v0] View All button clicked for list:", list.id)
                               try {
-                                router.push(`/lists/${list.id}`)
+                                router.push(`/lists/detail?id=${list.id}`)
                               } catch (error) {
                                 console.error("[v0] Navigation error:", error)
                                 toast({
@@ -943,7 +943,7 @@ export default function ListsPage() {
                             onClick={() => {
                               console.log("[v0] View All button clicked for recommendations list:", list.id)
                               try {
-                                router.push(`/lists/${list.id}`)
+                                router.push(`/lists/detail?id=${list.id}`)
                               } catch (error) {
                                 console.error("[v0] Navigation error:", error)
                                 toast({

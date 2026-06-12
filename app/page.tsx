@@ -1,5 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+"use client";
+
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,21 +16,17 @@ import { Users, Heart, Star } from "lucide-react";
 import { PWAInstallButton } from "@/components/pwa-install-button";
 import Image from "next/image";
 
-export default async function HomePage() {
-  const supabase = await createClient();
+export default function HomePage() {
+  const router = useRouter();
 
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    // If user is authenticated, redirect immediately
-    if (user) {
-      redirect("/feed");
-    }
-  } catch (error) {
-    console.log("[v0] Auth check failed, showing landing page");
-  }
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        router.replace("/feed");
+      }
+    });
+  }, [router]);
 
   return (
     <div className="min-h-screen pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">

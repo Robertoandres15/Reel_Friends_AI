@@ -1,41 +1,30 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Star, Calendar, Tv, Share2 } from "lucide-react"
+import { ArrowLeft, Star, Calendar, Clock, Share2, Ticket } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { ListSelector } from "@/components/list-selector"
 
-interface TVDetails {
+interface MovieDetails {
   id: number
-  name: string
+  title: string
   overview: string
   poster_path: string | null
   backdrop_path: string | null
-  first_air_date: string
-  last_air_date: string
+  release_date: string
   vote_average: number
   vote_count: number
-  number_of_episodes: number
-  number_of_seasons: number
+  runtime: number
   genres: Array<{ id: number; name: string }>
-  networks: Array<{ id: number; name: string; logo_path: string | null }>
   tagline: string
   status: string
-  type: string
   original_language: string
-  episode_run_time: number[]
-}
-
-interface List {
-  id: string
-  name: string
-  type: "wishlist" | "recommendations"
 }
 
 interface WatchProvider {
@@ -57,36 +46,37 @@ interface WatchProviders {
   }
 }
 
-export default function TVDetailPage() {
-  const params = useParams()
+export default function MovieDetailPage() {
+  const searchParams = useSearchParams()
+  const id = searchParams.get("id")
   const router = useRouter()
   const { toast } = useToast()
-  const [tvShow, setTVShow] = useState<TVDetails | null>(null)
+  const [movie, setMovie] = useState<MovieDetails | null>(null)
   const [watchProviders, setWatchProviders] = useState<WatchProviders | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (params.id) {
-      loadTVDetails()
+    if (id) {
+      loadMovieDetails()
       loadWatchProviders()
     }
-  }, [params.id])
+  }, [id])
 
-  const loadTVDetails = async () => {
+  const loadMovieDetails = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/tmdb/details?id=${params.id}&type=tv`)
+      const response = await fetch(`/api/tmdb/details?id=${id}&type=movie`)
 
       if (!response.ok) {
-        throw new Error(`Failed to load TV show details: ${response.status}`)
+        throw new Error(`Failed to load movie details: ${response.status}`)
       }
 
       const data = await response.json()
-      setTVShow(data)
+      setMovie(data)
     } catch (error) {
-      console.error("Failed to load TV show details:", error)
+      console.error("Failed to load movie details:", error)
       toast({
-        title: "Failed to load TV show details",
+        title: "Failed to load movie details",
         description: "Please try again later",
         variant: "destructive",
       })
@@ -97,7 +87,7 @@ export default function TVDetailPage() {
 
   const loadWatchProviders = async () => {
     try {
-      const response = await fetch(`/api/tmdb/watch-providers?id=${params.id}&type=tv`)
+      const response = await fetch(`/api/tmdb/watch-providers?id=${id}&type=movie`)
       if (response.ok) {
         const data = await response.json()
         setWatchProviders(data)
@@ -105,6 +95,16 @@ export default function TVDetailPage() {
     } catch (error) {
       console.error("Failed to load watch providers:", error)
     }
+  }
+
+  const getPosterUrl = (posterPath: string | null) => {
+    if (!posterPath) return "/placeholder.svg?height=600&width=400"
+    return `https://image.tmdb.org/t/p/w500${posterPath}`
+  }
+
+  const getBackdropUrl = (backdropPath: string | null) => {
+    if (!backdropPath) return "/placeholder.svg?height=400&width=800"
+    return `https://image.tmdb.org/t/p/w1280${backdropPath}`
   }
 
   const getStreamingUrl = (provider: WatchProvider) => {
@@ -126,20 +126,25 @@ export default function TVDetailPage() {
     return streamingUrls[provider.provider_name] || "#"
   }
 
-  const getPosterUrl = (posterPath: string | null) => {
-    if (!posterPath) return "/placeholder.svg?height=600&width=400"
-    return `https://image.tmdb.org/t/p/w500${posterPath}`
+  const handleAMCTickets = () => {
+    // AMC API integration would go here
+    // For now, redirect to AMC website with search
+    const amcUrl = `https://www.amctheatres.com/movies/${movie?.title?.toLowerCase().replace(/\s+/g, "-")}`
+    window.open(amcUrl, "_blank")
+
+    toast({
+      title: "Redirecting to AMC",
+      description: "Opening AMC website to purchase tickets",
+    })
   }
 
-  const getBackdropUrl = (backdropPath: string | null) => {
-    if (!backdropPath) return "/placeholder.svg?height=400&width=800"
-    return `https://image.tmdb.org/t/p/w1280${backdropPath}`
-  }
-
-  const formatRuntime = (minutes: number[]) => {
-    if (!minutes || minutes.length === 0) return "N/A"
-    const avgRuntime = minutes.reduce((a, b) => a + b, 0) / minutes.length
-    return `${Math.round(avgRuntime)}m avg`
+  const isInTheaters = () => {
+    if (!movie) return false
+    const releaseDate = new Date(movie.release_date)
+    const now = new Date()
+    const daysSinceRelease = (now.getTime() - releaseDate.getTime()) / (1000 * 3600 * 24)
+    // Assume movies are in theaters for about 90 days after release
+    return daysSinceRelease >= 0 && daysSinceRelease <= 90 && movie.status === "Released"
   }
 
   if (isLoading) {
@@ -150,11 +155,11 @@ export default function TVDetailPage() {
     )
   }
 
-  if (!tvShow) {
+  if (!movie) {
     return (
       <div className="min-h-screen pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-white text-xl mb-4">TV show not found</div>
+          <div className="text-white text-xl mb-4">Movie not found</div>
           <Button asChild variant="outline" className="border-white/20 text-white hover:bg-white/10 bg-transparent">
             <Link href="/explore">Back to Explore</Link>
           </Button>
@@ -170,8 +175,8 @@ export default function TVDetailPage() {
       {/* Backdrop */}
       <div className="relative h-96 overflow-hidden">
         <Image
-          src={getBackdropUrl(tvShow.backdrop_path) || "/placeholder.svg"}
-          alt={tvShow.name}
+          src={getBackdropUrl(movie.backdrop_path) || "/placeholder.svg"}
+          alt={movie.title}
           fill
           className="object-cover"
         />
@@ -199,8 +204,8 @@ export default function TVDetailPage() {
               <CardContent className="p-0">
                 <div className="relative aspect-[2/3] overflow-hidden rounded-lg">
                   <Image
-                    src={getPosterUrl(tvShow.poster_path) || "/placeholder.svg"}
-                    alt={tvShow.name}
+                    src={getPosterUrl(movie.poster_path) || "/placeholder.svg"}
+                    alt={movie.title}
                     fill
                     className="object-cover"
                   />
@@ -214,32 +219,32 @@ export default function TVDetailPage() {
             {/* Title and Actions */}
             <div className="space-y-4">
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2">{tvShow.name}</h1>
-                {tvShow.tagline && <p className="text-xl text-slate-300 italic">{tvShow.tagline}</p>}
+                <h1 className="text-4xl font-bold text-white mb-2">{movie.title}</h1>
+                {movie.tagline && <p className="text-xl text-slate-300 italic">{movie.tagline}</p>}
               </div>
 
               <div className="flex flex-wrap gap-4">
                 <ListSelector
                   mediaItem={{
-                    id: tvShow.id,
-                    name: tvShow.name,
-                    poster_path: tvShow.poster_path,
-                    overview: tvShow.overview,
-                    first_air_date: tvShow.first_air_date,
-                    vote_average: tvShow.vote_average,
-                    media_type: "tv",
+                    id: movie.id,
+                    title: movie.title,
+                    poster_path: movie.poster_path,
+                    overview: movie.overview,
+                    release_date: movie.release_date,
+                    vote_average: movie.vote_average,
+                    media_type: "movie",
                   }}
                   actionType="wishlist"
                 />
                 <ListSelector
                   mediaItem={{
-                    id: tvShow.id,
-                    name: tvShow.name,
-                    poster_path: tvShow.poster_path,
-                    overview: tvShow.overview,
-                    first_air_date: tvShow.first_air_date,
-                    vote_average: tvShow.vote_average,
-                    media_type: "tv",
+                    id: movie.id,
+                    title: movie.title,
+                    poster_path: movie.poster_path,
+                    overview: movie.overview,
+                    release_date: movie.release_date,
+                    vote_average: movie.vote_average,
+                    media_type: "movie",
                   }}
                   actionType="recommendations"
                 />
@@ -254,33 +259,25 @@ export default function TVDetailPage() {
             <div className="flex flex-wrap gap-4 text-slate-300">
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-medium">{tvShow.vote_average.toFixed(1)}</span>
-                <span className="text-sm">({tvShow.vote_count.toLocaleString()} votes)</span>
+                <span className="font-medium">{movie.vote_average.toFixed(1)}</span>
+                <span className="text-sm">({movie.vote_count.toLocaleString()} votes)</span>
               </div>
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                <span>{new Date(tvShow.first_air_date).getFullYear()}</span>
-                {tvShow.last_air_date && tvShow.status === "Ended" && (
-                  <span>-{new Date(tvShow.last_air_date).getFullYear()}</span>
-                )}
+                <span>{new Date(movie.release_date).getFullYear()}</span>
               </div>
               <div className="flex items-center gap-1">
-                <Tv className="h-4 w-4" />
-                <span>
-                  {tvShow.number_of_seasons} seasons, {tvShow.number_of_episodes} episodes
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span>{formatRuntime(tvShow.episode_run_time)}</span>
+                <Clock className="h-4 w-4" />
+                <span>{(movie.runtime / 60).toFixed(1)}h</span>
               </div>
               <Badge variant="secondary" className="bg-white/10 text-white">
-                {tvShow.status}
+                {movie.status}
               </Badge>
             </div>
 
             {/* Genres */}
             <div className="flex flex-wrap gap-2">
-              {tvShow.genres.map((genre) => (
+              {movie.genres.map((genre) => (
                 <Badge key={genre.id} variant="outline" className="border-purple-400 text-purple-300">
                   {genre.name}
                 </Badge>
@@ -290,13 +287,24 @@ export default function TVDetailPage() {
             {/* Overview */}
             <div>
               <h2 className="text-2xl font-bold text-white mb-3">Overview</h2>
-              <p className="text-slate-300 leading-relaxed">{tvShow.overview}</p>
+              <p className="text-slate-300 leading-relaxed">{movie.overview}</p>
             </div>
 
             {/* Streaming Services */}
             {usProviders && (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-white">Where to Watch</h3>
+
+                {/* In Theaters */}
+                {isInTheaters() && (
+                  <div className="mb-4">
+                    <h4 className="text-md font-medium text-white mb-2">In Theaters</h4>
+                    <Button onClick={handleAMCTickets} className="bg-red-600 hover:bg-red-700 text-white">
+                      <Ticket className="h-4 w-4 mr-2" />
+                      Buy AMC Tickets
+                    </Button>
+                  </div>
+                )}
 
                 {/* Streaming Services */}
                 {usProviders.flatrate && usProviders.flatrate.length > 0 && (
@@ -345,20 +353,6 @@ export default function TVDetailPage() {
 
                 {/* Attribution to JustWatch as required by TMDB */}
                 <p className="text-xs text-slate-400 mt-2">Streaming data provided by JustWatch</p>
-              </div>
-            )}
-
-            {/* Networks */}
-            {tvShow.networks.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-3">Original Networks</h3>
-                <div className="flex flex-wrap gap-4">
-                  {tvShow.networks.map((network) => (
-                    <div key={network.id} className="text-slate-300">
-                      {network.name}
-                    </div>
-                  ))}
-                </div>
               </div>
             )}
           </div>
